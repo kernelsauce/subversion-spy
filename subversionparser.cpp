@@ -2,32 +2,50 @@
 
 namespace Spy{
 
-SubversionParser::SubversionParser(QString path, bool updateFirst) : path(path)
-{
-    if (updateFirst)
-    {
-        updatePath();
-    }
+/// Node keys.
+static const QString svnXmlMsgKey = SVN_XML_MSG;
+static const QString svnXmlAuthorKey = SVN_XML_AUTHOR;
+static const QString svnXmlDateKey = SVN_XML_DATE;
+static const QString svnXmlRevKey = SVN_XML_REVISION;
+static const QString svnXmlPathsKey = SVN_XML_PATHS;
+static const QString svnXmlPathKey = SVN_XML_PATH;
 
+SubversionParserSyncro::SubversionParserSyncro(QString path, bool updateFirst) : path(path)
+{
+    qDebug() << "SubversionParserSyncro constructed.";
+    if (updateFirst) updatePath();
 }
 
-QList<SubversionLog> SubversionParser::getLogs(uint64_t fromRev, uint64_t toRev)
-{
-}
-
-QList<SubversionLog> SubversionParser::getLogs()
+QVector<SubversionLog> SubversionParserSyncro::getLogs(int64_t fromRev, int64_t toRev)
 {
     QProcess svnProc;
-    const QString executeCmd = QString().
+    QString executeCmd = QString().
             append(SVN_LOG).
             append(SPACE).
             append(SVN_XML_OPT).
-//            append(SPACE).
-//            append(SVN_VERBOSE_OPT).
-            append(SPACE) + path;
+            append(SPACE).
+            append(SVN_VERBOSE_OPT);
 
+    // Are we getting specified revision or not?
+    if ( !(fromRev == -1 && toRev == -1) )
+    {
+        executeCmd.
+                append(SPACE).
+                append(SVN_REVISION_OPT);
+        if (fromRev != -1) executeCmd.append(QString::number(fromRev));
+        else executeCmd.append("0");
+
+        executeCmd.append(":");
+
+        if (toRev != -1) executeCmd.append(QString::number(toRev));
+        else executeCmd.append("HEAD");
+    }
+
+    // Add path.
+    executeCmd.append(SPACE).append(path);
     svnProc.start(executeCmd);
-    while(!svnProc.waitForFinished(100))
+    qDebug() << executeCmd;
+    while(!svnProc.waitForFinished(500))
     {
     }
 
@@ -35,27 +53,8 @@ QList<SubversionLog> SubversionParser::getLogs()
 
     if (rc == QProcess::NormalExit)
     {
-        QList<SubversionLog> parsedLogs;
-
         const QByteArray svnXmlOutput = svnProc.readAllStandardOutput();
-
-        QDomDocument svnOutput;
-        if (!svnOutput.setContent(svnXmlOutput)) throw E_PARSE_PROBLEMS;
-
-        QDomNodeList logEntryNodes = svnOutput.elementsByTagName(SVN_XML_LOGENTRY);
-        qDebug() << "Size of nodes " << logEntryNodes.size();
-        for (int32_t currentNode = 0; currentNode <= logEntryNodes.size(); currentNode++){
-            SubversionLog currentLogEntry;
-
-            QDomNode logEntryNode = logEntryNodes.item(currentNode);
-
-            currentLogEntry.comment = logEntryNode.firstChildElement(SVN_XML_MSG).nodeValue();
-            currentLogEntry.author = logEntryNode.firstChildElement(SVN_XML_AUTHOR).nodeValue();
-            currentLogEntry.date = logEntryNode.firstChildElement(SVN_XML_DATE).nodeValue();
-            parsedLogs.push_front(currentLogEntry);
-        }
-
-        return parsedLogs;
+        return parseLogs(&svnXmlOutput);
     }
     else
     {
@@ -63,7 +62,14 @@ QList<SubversionLog> SubversionParser::getLogs()
     }
 }
 
-bool SubversionParser::updatePath()
+QVector<SubversionLog> SubversionParserSyncro::getLogs()
+{
+    return getLogs(-1 , -1);
+}
+
+
+
+bool SubversionParserSyncro::updatePath()
 {
     QProcess svnProc;
     const QString executeCmd = QString().
@@ -71,7 +77,7 @@ bool SubversionParser::updatePath()
             append(SPACE) + path;
 
     svnProc.start(executeCmd);
-    while(!svnProc.waitForFinished(100))
+    while(!svnProc.waitForFinished(500))
     {
     }
 
@@ -81,6 +87,42 @@ bool SubversionParser::updatePath()
     QProcess::ExitStatus rc = svnProc.exitStatus();
 
     return rc == QProcess::NormalExit ? true : false;
+}
+
+QVector<SubversionLog> SubversionParserSyncro::parseLogs(const QByteArray *xmlData)
+{
+    QVector<SubversionLog> parsedLogs;
+    QDomDocument svnOutput;
+    if (!svnOutput.setContent(*xmlData)) throw E_PARSE_PROBLEMS;
+
+    QDomNodeList logEntryNodes = svnOutput.elementsByTagName(SVN_XML_LOGENTRY);
+
+    for (int32_t currentLogEntryNode = 0; currentLogEntryNode < logEntryNodes.size(); currentLogEntryNode++){
+        SubversionLog currentLogEntry;
+
+        const QDomNode logEntryNode = logEntryNodes.item(currentLogEntryNode);
+        currentLogEntry.revNumber = (uint64_t) logEntryNode.toElement().attribute(svnXmlRevKey).toLongLong();
+        currentLogEntry.comment = logEntryNode.firstChildElement(svnXmlMsgKey).text();
+        currentLogEntry.author = logEntryNode.firstChildElement(svnXmlAuthorKey).text();
+        currentLogEntry.date = logEntryNode.firstChildElement(svnXmlDateKey).text();
+
+        // Do we have changed files?
+        const QDomElement pathsElement = logEntryNode.firstChildElement(svnXmlPathsKey);
+        if (pathsElement.isElement())
+        {
+            currentLogEntry.files = QStringList();
+            const QDomNodeList pathsNode = pathsElement.elementsByTagName(svnXmlPathKey);
+            for (int32_t currentPath = 0; currentPath < pathsNode.size(); currentPath++ )
+            {
+                const QDomNode pathNode = pathsNode.item(currentPath);
+                currentLogEntry.files.append(pathNode.toElement().text());
+            }
+        }
+
+        parsedLogs.append(currentLogEntry);
+    }
+
+    return parsedLogs;
 }
 
 }

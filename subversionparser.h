@@ -6,6 +6,7 @@
 #include <QList>
 #include <QDebug>
 #include <stdint.h>
+#include "spytypes.h"
 
 /************  SVN Commands  *************/
 #define SVN_CMD                 "svn "
@@ -15,41 +16,30 @@
 /************  SVN Options   *************/
 #define SVN_XML_OPT             "--xml"
 #define SVN_VERBOSE_OPT         "-v"
+#define SVN_REVISION_OPT        "-r"
 /************  SVN Keywords  *************/
 #define SVN_XML_LOGENTRY        "logentry"
+#define SVN_XML_REVISION        "revision"
 #define SVN_XML_AUTHOR          "author"
 #define SVN_XML_MSG             "msg"
 #define SVN_XML_DATE            "date"
+#define SVN_XML_PATHS           "paths"
+#define SVN_XML_PATH            "path"
 #define SPACE                   " "
-
 
 namespace Spy{
 
-typedef struct {
-    uint64_t revNumber;
-    QString comment;
-    QString author;
-    QString date;
-    QStringList files;
-} SubversionLog;
-
-enum ParserException{
-    E_PARSE_PROBLEMS,
-    E_NO_CONNECTION,
-    E_GENERIC,
-    E_TIMED_OUT
-};
-
-class SubversionParser
+class SubversionParserSyncro
 {
 public:
-    SubversionParser(QString path, bool updateFirst);
-    QList<SubversionLog> getLogs(uint64_t fromRev, uint64_t toRev);
-    QList<SubversionLog> getLogs();
+    SubversionParserSyncro(QString path, bool updateFirst);
+    QVector<SubversionLog> getLogs(int64_t fromRev, int64_t toRev);
+    QVector<SubversionLog> getLogs();
     bool updatePath();
 
 private:
     QString path;
+    QVector<SubversionLog> parseLogs(const QByteArray* xmlData);
 
 };
 
