@@ -12,7 +12,6 @@ ListenerPathForm::ListenerPathForm(QWidget *parent,
     qDebug() << "Constr. new ListenerPathForm";
     ui->setupUi(this);
     ui->pathEdit->placeholderText();
-    setFixedSize(480, 640);
     setWindowTitle("Subversion Spy - Modify observer paths");
     setWindowIcon(QIcon(":/icons/res/spy-icon.png"));
     updateListing();
@@ -58,4 +57,31 @@ void ListenerPathForm::on_addButton_clicked()
 void ListenerPathForm::on_saveButton_clicked()
 {
     done(QDialog::Accepted);
+}
+
+void ListenerPathForm::on_removeButton_clicked()
+{
+    QList<QListWidgetItem*> selectedListeners = ui->listWidget->selectedItems();
+    QListIterator<QListWidgetItem*> selectedListenersIt(selectedListeners);
+    while (selectedListenersIt.hasNext())
+    {
+        const QString listenerPathToRemove = selectedListenersIt.next()->text();
+
+        listenerPathsMutex->lock();
+        QVectorIterator<QString> it(*listenerPaths);
+
+        int32_t i = 0;
+        while (it.hasNext())
+        {
+            if (it.next() == listenerPathToRemove)
+            {
+                listenerPaths->remove(i);
+                break;
+            }
+            i++;
+        }
+        listenerPathsMutex->unlock();
+
+        updateListing();
+    }
 }
