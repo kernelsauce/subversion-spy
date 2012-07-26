@@ -4,15 +4,24 @@ namespace Spy{
 
 SubversionWorker::SubversionWorker(QString path) :
     parser(SubversionParserSyncro(path, false)),
-    lastRevNumber(0)
+    lastRevNumber(0),
+    path(path),
+    kill(false)
 {
 }
 
 SubversionWorker::~SubversionWorker()
 {
+    kill = true;
+    wait();
 }
 
-void SubversionWorker::process()
+QString SubversionWorker::getWorkingPath()
+{
+    return path;
+}
+
+void SubversionWorker::run()
 {
     if (lastRevNumber == 0)
     {
@@ -24,17 +33,23 @@ void SubversionWorker::process()
 
     QVector<SubversionLog> fullLog = parser.getLogs();
     if (fullLog.isEmpty()) return; // Empty logs, just bail.
-    SubversionLog lastLog = fullLog.back();
+    SubversionLog lastLog = fullLog.front();
     lastRevNumber = lastLog.revNumber;
 
-    // Sleep;
+    // Update user about success.
+    emit giveUserFeedback(
+                "Full log for " + path + " fetched. \r\n\r\n"
+                "Last revision number is r" + QString::number(lastRevNumber) + "\r\n" +
+                "Author: " + lastLog.author + "\r\n" +
+                "Comment: " + lastLog.comment + "\r\n",
+                N_UPDATED_REPOSITORY);
 
-    while(1)
+    while(!kill)
     {
         QVector<SubversionLog> freshLogs;
         try
         {
-            freshLogs = parser.getLogs(lastRevNumber, NULL);
+            freshLogs = parser.getLogs(lastRevNumber + 1, -1);
         }
         catch(ParserException e){
             qDebug() << "SubversionParser throw: " << e;
@@ -46,9 +61,11 @@ void SubversionWorker::process()
             while (it.hasNext())
             {
                 SubversionLog freshLog = it.next();
-                sendNotification(freshLog.comment, N_NEW_REVISON); // TODO just a sample.
+                emit giveUserFeedback(freshLog.comment, N_NEW_REVISON); // TODO just a sample.
             }
         }
+
+        if (!kill) sleep(10);
 
     }
 }

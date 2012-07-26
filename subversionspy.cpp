@@ -30,21 +30,15 @@ SubversionSpy::SubversionSpy(QWidget *parent)
     /*
      * Init thread monitor. Which we use to stop/start SVN threads.
      */
-    monitorThread = new QThread();
     monitor = new ThreadMonitor(this, &listenerPaths, &listenerPathsMutex);
-    monitor->moveToThread(monitorThread);
-    monitorThread->start();
-    connect(monitor, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
-    connect(monitorThread, SIGNAL(started()), monitor, SLOT(process()));
-    connect(monitor, SIGNAL(finished()), monitorThread, SLOT(quit()));
-    connect(monitorThread, SIGNAL(finished()), monitorThread, SLOT(deleteLater()));
-    connect(monitorThread, SIGNAL(finished()), monitorThread, SLOT(deleteLater()));
+    monitor->start();
 
     qRegisterMetaType<SpyNotifications>("SpyNotifications"); // Register our enum as meta type to allow signal and slots with the type.
     connect(monitor, SIGNAL(sendNotifications(QString, SpyNotifications)), this, SLOT(displayNotification(QString,SpyNotifications)));
 
     trayIcon->show();
     trayIcon->showMessage("Subversion Spy started!",  "Please add path observers from the tray icon.");
+    addListenerPaths();
 }
 
 SubversionSpy::~SubversionSpy()

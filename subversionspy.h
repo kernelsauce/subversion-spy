@@ -27,7 +27,6 @@ public:
 private:
     QVector<QString> listenerPaths;
     QMutex listenerPathsMutex;
-    QThread* monitorThread;
     ThreadMonitor* monitor;
     QVector<QThread>* svnWorkers;
     QSystemTrayIcon* trayIcon;

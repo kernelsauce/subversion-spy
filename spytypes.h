@@ -29,8 +29,10 @@ enum ParserException{
  * Enumeration of notification types for the tray.
  */
 enum SpyNotifications{
-    N_NOT_SVN_DIR,      /// Path added to listener paths is not a SVN directory.
-    N_NEW_REVISON       /// A new revision notification.
+    N_NOT_SVN_DIR,          /// Path added to listener paths is not a SVN directory.
+    N_NEW_REVISON,          /// A new revision notification.
+    N_ADDED_REPOSITORY,     /// A new repository was added to listener.
+    N_UPDATED_REPOSITORY    /// Repository was updated successfully.
 };
 
 /**

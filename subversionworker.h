@@ -8,7 +8,7 @@
 
 namespace Spy{
 
-class SubversionWorker : public QObject
+class SubversionWorker : public QThread
 {
     Q_OBJECT
 public:
@@ -21,12 +21,13 @@ private:
     QVector<SubversionLog> svnLogs;
     uint64_t lastRevNumber;
     QString path;
+    bool kill;
 
 signals:
-    void sendNotification(QString message, SpyNotifications type);
+    void giveUserFeedback(QString message, SpyNotifications type);
     
-public slots:
-    void process();
+protected:
+    void run();
 
 };
 

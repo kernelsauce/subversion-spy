@@ -10,7 +10,7 @@
 
 namespace Spy{
 
-class ThreadMonitor : public QObject
+class ThreadMonitor : public QThread
 {
     Q_OBJECT
 public:
@@ -29,13 +29,17 @@ private:
     QMutex* listenerPathsMutex;
     QVector<SubversionWorker*> workerPool;
     QMutex eventLoopRunning;
+
     bool kill;
 
     SubversionWorker* findWorkerByWork(QString listenerPath);
+    bool inListenerPaths(QString listenerPath);
 
 public slots:
     void propagateNotifications(QString message, SpyNotifications type);
-    void process();
+
+protected:
+    void run();
     
 };
 }
