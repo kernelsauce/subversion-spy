@@ -47,6 +47,7 @@ SubversionSpy::~SubversionSpy()
     delete trayIcon;
     delete trayMenu;
     delete addListenerPathsAction;
+    delete monitor;
 }
 
 void SubversionSpy::addListenerPaths()
@@ -75,8 +76,23 @@ void SubversionSpy::errorString(QString err)
 
 void SubversionSpy::displayNotification(QString message, SpyNotifications type)
 {
-    // TODO: Diff between types of notifications.
-    trayIcon->showMessage("Subversion Spy", message);
+    switch (type){
+    case N_UPDATED_REPOSITORY:
+        trayIcon->showMessage("Subversion Spy - Updated Repository", message);
+        break;
+
+    case N_ADDED_REPOSITORY:
+        trayIcon->showMessage("Subversion Spy - New Repository", message);
+        break;
+
+    case N_NEW_REVISON:
+        trayIcon->showMessage("Subversion Spy - Check in alert!", message);
+        break;
+
+    case N_NOT_SVN_DIR:
+        trayIcon->showMessage("Subversion Spy - Not a repository", message);
+        break;
+    }
 }
 
 }

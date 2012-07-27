@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QMutex>
 #include <stdint.h>
 #include "subversionparser.h"
 
@@ -22,6 +23,10 @@ private:
     uint64_t lastRevNumber;
     QString path;
     bool kill;
+    QMutex killMutex;
+
+    void handleNewLogs(QVector<SubversionLog> *freshLogs);
+    bool initialLogFetch();
 
 signals:
     void giveUserFeedback(QString message, SpyNotifications type);

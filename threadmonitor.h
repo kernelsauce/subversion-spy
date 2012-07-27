@@ -8,6 +8,8 @@
 #include <QDebug>
 #include "subversionworker.h"
 
+#define THREAD_MONITOR_ITERATION 2
+
 namespace Spy{
 
 class ThreadMonitor : public QThread
@@ -28,12 +30,11 @@ private:
     QVector<QString>* listenerPaths;
     QMutex* listenerPathsMutex;
     QVector<SubversionWorker*> workerPool;
-    QMutex eventLoopRunning;
-
     bool kill;
+    QMutex killMutex;
 
     SubversionWorker* findWorkerByWork(QString listenerPath);
-    bool inListenerPaths(QString listenerPath);
+    inline bool inListenerPaths(QString listenerPath);
 
 public slots:
     void propagateNotifications(QString message, SpyNotifications type);

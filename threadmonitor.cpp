@@ -13,23 +13,24 @@ ThreadMonitor::ThreadMonitor(QObject *parent,
 
 ThreadMonitor::~ThreadMonitor()
 {
+    killMutex.lock();
     kill = true;
-    eventLoopRunning.lock();
-    emit finished();
-    eventLoopRunning.unlock();
+    killMutex.unlock();
+    wait();
 }
 
 void ThreadMonitor::run()
 {
-    eventLoopRunning.lock();
     while(1)
     {
+        killMutex.unlock();
         if (kill)
         {
-            eventLoopRunning.unlock();
-            emit finished();
+            killMutex.unlock();
             break;
         }
+        killMutex.unlock();
+
         listenerPathsMutex->lock();
         QVectorIterator<QString> listenerPathIt(*listenerPaths);
 
@@ -45,22 +46,23 @@ void ThreadMonitor::run()
             }
         }
 
+        // Stop workers that no longer is in list.
         QVectorIterator<SubversionWorker*> workerIt(workerPool);
-        uint32_t i = 0;
+        uint32_t index = 0;
         while (workerIt.hasNext())
         {
             SubversionWorker* workerInPool = workerIt.next();
             if (!inListenerPaths(workerInPool->getWorkingPath()))
             {
-                workerPool.remove(i);
+                workerPool.remove(index);
                 delete workerInPool;
             }
-            i++;
+            index++;
         }
 
         listenerPathsMutex->unlock();
 
-        sleep(2);
+        sleep(THREAD_MONITOR_ITERATION);
     }
 }
 
@@ -83,7 +85,7 @@ SubversionWorker* ThreadMonitor::findWorkerByWork(QString listenerPath)
     return NULL;
 }
 
-bool ThreadMonitor::inListenerPaths(QString listenerPath)
+inline bool ThreadMonitor::inListenerPaths(QString listenerPath)
 {
     bool exists = false;
     QVectorIterator<QString> path(*listenerPaths);

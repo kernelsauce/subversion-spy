@@ -9,10 +9,10 @@ ListenerPathForm::ListenerPathForm(QWidget *parent,
     listenerPaths(listenerPaths),
     listenerPathsMutex(listenerPathsMutex)
 {
-    qDebug() << "Constr. new ListenerPathForm";
     ui->setupUi(this);
-    ui->pathEdit->placeholderText();
-    setWindowTitle("Subversion Spy - Modify observer paths");
+    this->setFixedSize(this->size()); // Don't allow resize.
+
+    setWindowTitle(WINDOW_TITLE);
     setWindowIcon(QIcon(":/icons/res/spy-icon.png"));
     updateListing();
 }
@@ -68,17 +68,17 @@ void ListenerPathForm::on_removeButton_clicked()
         const QString listenerPathToRemove = selectedListenersIt.next()->text();
 
         listenerPathsMutex->lock();
-        QVectorIterator<QString> it(*listenerPaths);
+        QVectorIterator<QString> listenerPathsIt(*listenerPaths);
 
-        int32_t i = 0;
-        while (it.hasNext())
+        int32_t index = 0;
+        while (listenerPathsIt.hasNext())
         {
-            if (it.next() == listenerPathToRemove)
+            if (listenerPathsIt.next() == listenerPathToRemove)
             {
-                listenerPaths->remove(i);
+                listenerPaths->remove(index);
                 break;
             }
-            i++;
+            index++;
         }
         listenerPathsMutex->unlock();
 

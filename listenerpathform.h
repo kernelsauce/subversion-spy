@@ -9,6 +9,8 @@
 #include <QMutex>
 #include <QFileDialog>
 
+#define WINDOW_TITLE "Subversion Spy - Modify observer paths"
+
 namespace Ui {
 class ListenerPathForm;
 }
