@@ -4,7 +4,9 @@ namespace Spy{
 
 SubversionSpy::SubversionSpy(QWidget *parent)
     : QMainWindow(parent),
+      pollRate(THREAD_POLL_RATE),
       trayIconGraphic(QIcon(":/icons/res/spy-icon.png"))
+
 {
     trayIcon = new QSystemTrayIcon(trayIconGraphic, this);
     trayMenu = new QMenu(this);
@@ -41,6 +43,8 @@ SubversionSpy::SubversionSpy(QWidget *parent)
 
     trayIcon->show();
     trayIcon->showMessage("Subversion Spy started!",  "Please add path observers from the tray icon.");
+    addListenerPaths();
+    openWkGui();
 }
 
 SubversionSpy::~SubversionSpy()
@@ -95,6 +99,22 @@ QVector<NotificationEntry> *SubversionSpy::getNNotifications(uint32_t amount, ui
 
     notiLogMutex.unlock();
     return notiLogCopy;
+}
+
+void SubversionSpy::setPollRate(uint32_t seconds)
+{
+    pollRateMutex.lock();
+    pollRate = seconds;
+    pollRateMutex.unlock();
+}
+
+uint32_t SubversionSpy::getPollRate()
+{
+    uint32_t pollRateReturn;
+    pollRateMutex.lock();
+    pollRateReturn = pollRate;
+    pollRateMutex.unlock();
+    return pollRateReturn;
 }
 
 void SubversionSpy::addListenerPaths()

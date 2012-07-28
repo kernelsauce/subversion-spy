@@ -22,7 +22,12 @@ private:
     
 public slots:
     void sendNotification(QString message, int type);
+    QStringList getAllNotifications();
     QStringList getListenerPaths();
+    void addListenerPath(QString path);
+    bool removeListenerPath(QString path);
+    void setPollRate(int seconds);
+    int getPollRate();
 };
 }
 #endif // SPYWKBRIDGE_H

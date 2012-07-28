@@ -21,6 +21,7 @@
 
 #define DBG 1
 #define WK_WINDOW_NAME "Subversion Spy Configuration"
+#define THREAD_POLL_RATE 10
 
 namespace Spy{
 
@@ -37,6 +38,8 @@ private:
     QMutex notiLogMutex;                ///< Lock when accessing notiLog.
     QWebView* wkGui;                    ///< Pointer to webkit browser.
     SpyWkBridge* bridge;                ///< Pointer to webkit javascript bridge.
+    uint32_t pollRate;                  ///< Poll rate for threads in seconds.
+    QMutex pollRateMutex;               ///< Lock when accessing pollRate.
 
     // Tray icon:
     QSystemTrayIcon* trayIcon;          ///< Pointer to the tray icon.
@@ -82,6 +85,18 @@ public:
      */
     QVector<NotificationEntry>* getNNotifications(uint32_t amount,
                                                   uint32_t offset);
+
+    /**
+     * Set the poll rate of the listener threads.
+     * @param seconds Wait n amount seconds before doing a recheck.
+     */
+    void setPollRate(uint32_t seconds);
+
+    /**
+     * Get current poll rate of the listener threads;
+     * @return the current poll rate.
+     */
+    uint32_t getPollRate();
 
 
 public slots:

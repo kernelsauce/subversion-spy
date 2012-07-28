@@ -53,8 +53,16 @@ QVector<SubversionLog> SubversionParserSyncro::getLogs(int64_t fromRev, int64_t 
 
     if (rc == QProcess::NormalExit)
     {
+        QVector<SubversionLog> logs;
         const QByteArray svnXmlOutput = svnProc.readAllStandardOutput();
-        return parseLogs(&svnXmlOutput);
+        try
+        {
+            logs = parseLogs(&svnXmlOutput);
+        }
+        catch(...){
+            // Do nothing at this point in time :p.
+        }
+        return logs;
     }
     else
     {
