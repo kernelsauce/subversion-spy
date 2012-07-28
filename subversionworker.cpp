@@ -2,10 +2,14 @@
 
 namespace Spy{
 
-SubversionWorker::SubversionWorker(QString path) :
+SubversionWorker::SubversionWorker(QString path,
+                                   uint32_t *pollRate,
+                                   QMutex* pollRateMutex) :
     parser(SubversionParserSyncro(path, false)),
     lastRevNumber(0),
     path(path),
+    pollRate(pollRate),
+    pollRateMutex(pollRateMutex),
     kill(false)
 {
 }
@@ -91,7 +95,9 @@ void SubversionWorker::run()
         if (!kill)
         {
             killMutex.unlock();
-            sleep(10); // TODO: wait should be customizable.
+            pollRateMutex->lock();
+            sleep((unsigned long)pollRate);
+            pollRateMutex->unlock();
         }
         else
         {

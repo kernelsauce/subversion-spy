@@ -17,7 +17,10 @@ class ThreadMonitor : public QThread
     Q_OBJECT
 public:
     ThreadMonitor(QVector<QString>* listenerPaths = NULL,
-                  QMutex* listenerPathsMutex = NULL);
+                  QMutex* listenerPathsMutex = NULL,
+                  uint32_t* pollRate = NULL,
+                  QMutex* pollRateMutex = NULL);
+
     ~ThreadMonitor();
     
 signals:
@@ -29,6 +32,8 @@ private:
     QVector<QString>* listenerPaths;
     QMutex* listenerPathsMutex;
     QVector<SubversionWorker*> workerPool;
+    uint32_t* pollRate;
+    QMutex* pollRateMutex;
     bool kill;
     QMutex killMutex;
 

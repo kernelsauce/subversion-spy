@@ -3,10 +3,13 @@
 namespace Spy{
 
 ThreadMonitor::ThreadMonitor(QVector<QString> *listenerPaths,
-                             QMutex *listenerPathsMutex) :
+                             QMutex *listenerPathsMutex,
+                             uint32_t* pollRate, QMutex *pollRateMutex) :
     listenerPaths(listenerPaths),
     listenerPathsMutex(listenerPathsMutex),
-    kill(false)
+    kill(false),
+    pollRate(pollRate),
+    pollRateMutex(pollRateMutex)
 {
 }
 

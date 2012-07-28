@@ -13,7 +13,9 @@ class SubversionWorker : public QThread
 {
     Q_OBJECT
 public:
-    explicit SubversionWorker(QString path = NULL);
+    explicit SubversionWorker(QString path = NULL,
+                              uint32_t *pollRate = NULL,
+                              QMutex* pollRateMutex = NULL);
     ~SubversionWorker();
     QString getWorkingPath();
     
@@ -22,6 +24,8 @@ private:
     QVector<SubversionLog> svnLogs;
     uint64_t lastRevNumber;
     QString path;
+    uint32_t* pollRate;
+    QMutex* pollRateMutex;
     bool kill;
     QMutex killMutex;
 

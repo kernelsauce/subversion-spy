@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml qt-gif webkit
+QT       += core gui xml webkit
 
 TARGET = SubversionSpy
 TEMPLATE = app
@@ -36,4 +36,6 @@ FORMS += \
     listenerpathform.ui
 
 OTHER_FILES += \
-    wkGui/index.html
+    wkGui/index.html \
+    wkGui/styles/main.css \
+    wkGui/js/spy.js

@@ -5,7 +5,7 @@ namespace Spy{
 SubversionSpy::SubversionSpy(QWidget *parent)
     : QMainWindow(parent),
       pollRate(THREAD_POLL_RATE),
-      trayIconGraphic(QIcon(":/icons/res/spy-icon.png"))
+      trayIconGraphic(QIcon(":/icons/icons/spy-icon.png"))
 
 {
     trayIcon = new QSystemTrayIcon(trayIconGraphic, this);
@@ -35,7 +35,10 @@ SubversionSpy::SubversionSpy(QWidget *parent)
     /*
      * Init thread monitor. Which we use to stop/start SVN threads.
      */
-    monitor = new ThreadMonitor(&listenerPaths, &listenerPathsMutex);
+    monitor = new ThreadMonitor(&listenerPaths,
+                                &listenerPathsMutex,
+                                &pollRate,
+                                &pollRateMutex);
     monitor->start();
 
     qRegisterMetaType<SpyNotifications>("SpyNotifications"); // Register our enum as meta type to allow signal and slots with the type.
@@ -43,7 +46,6 @@ SubversionSpy::SubversionSpy(QWidget *parent)
 
     trayIcon->show();
     trayIcon->showMessage("Subversion Spy started!",  "Please add path observers from the tray icon.");
-    addListenerPaths();
     openWkGui();
 }
 
