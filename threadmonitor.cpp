@@ -2,9 +2,8 @@
 
 namespace Spy{
 
-ThreadMonitor::ThreadMonitor(QObject *parent,
-                             QVector<QString> *listenerPaths,
-                             QMutex* listenerPathsMutex) :
+ThreadMonitor::ThreadMonitor(QVector<QString> *listenerPaths,
+                             QMutex *listenerPathsMutex) :
     listenerPaths(listenerPaths),
     listenerPathsMutex(listenerPathsMutex),
     kill(false)

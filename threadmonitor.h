@@ -16,8 +16,7 @@ class ThreadMonitor : public QThread
 {
     Q_OBJECT
 public:
-    ThreadMonitor(QObject *parent = 0,
-                  QVector<QString>* listenerPaths = NULL,
+    ThreadMonitor(QVector<QString>* listenerPaths = NULL,
                   QMutex* listenerPathsMutex = NULL);
     ~ThreadMonitor();
     

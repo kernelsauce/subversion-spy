@@ -33,7 +33,7 @@ SubversionSpy::SubversionSpy(QWidget *parent)
     /*
      * Init thread monitor. Which we use to stop/start SVN threads.
      */
-    monitor = new ThreadMonitor(this, &listenerPaths, &listenerPathsMutex);
+    monitor = new ThreadMonitor(&listenerPaths, &listenerPathsMutex);
     monitor->start();
 
     qRegisterMetaType<SpyNotifications>("SpyNotifications"); // Register our enum as meta type to allow signal and slots with the type.
