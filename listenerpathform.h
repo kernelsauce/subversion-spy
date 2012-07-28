@@ -8,6 +8,7 @@
 #include <QDialog>
 #include <QMutex>
 #include <QFileDialog>
+#include <stdint.h>
 
 #define WINDOW_TITLE "Subversion Spy - Modify observer paths"
 

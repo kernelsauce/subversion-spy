@@ -4,12 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml qt-gif
+QT       += core gui xml qt-gif webkit
 
 TARGET = SubversionSpy
 TEMPLATE = app
 
-QMAKE_LFLAGS += -static-libgcc
+QMAKE_LFLAGS +=
 
 SOURCES += main.cpp\
         subversionspy.cpp \
@@ -17,7 +17,8 @@ SOURCES += main.cpp\
     spydb.cpp \
     listenerpathform.cpp \
     threadmonitor.cpp \
-    subversionworker.cpp
+    subversionworker.cpp \
+    spywkbridge.cpp
 
 HEADERS  += subversionspy.h \
     subversionparser.h \
@@ -25,10 +26,14 @@ HEADERS  += subversionspy.h \
     listenerpathform.h \
     threadmonitor.h \
     subversionworker.h \
-    spytypes.h
+    spytypes.h \
+    spywkbridge.h
 
 RESOURCES += \
     spyresources.qrc
 
 FORMS += \
     listenerpathform.ui
+
+OTHER_FILES += \
+    wkGui/index.html

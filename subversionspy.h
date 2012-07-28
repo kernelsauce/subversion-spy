@@ -8,11 +8,19 @@
 #include <QPixmap>
 #include <QDebug>
 #include <QMutex>
+#include <QtWebKit/QWebView>
+#include <QtWebKit/QWebFrame>
+
 #include <stdint.h>
+
 #include "spytypes.h"
 #include "listenerpathform.h"
 #include "subversionparser.h"
 #include "threadmonitor.h"
+#include "spywkbridge.h"
+
+#define DBG 1
+#define WK_WINDOW_NAME "Subversion Spy Configuration"
 
 namespace Spy{
 
@@ -20,29 +28,84 @@ class SubversionSpy : public QMainWindow
 {
     Q_OBJECT
     
+private:
+    QVector<QString> listenerPaths;     ///< Paths that the thread monitor will assign to workers.
+    QMutex listenerPathsMutex;          ///< Lock this mutex when accessing listenerPaths.
+    ThreadMonitor* monitor;             ///< Thread monitor for Subversion workers.
+    QVector<QThread>* svnWorkers;       ///< Vector of Subverson workers (threads).
+    QVector<NotificationEntry> notiLog; ///< Vector of notification entries.
+    QMutex notiLogMutex;                ///< Lock when accessing notiLog.
+    QWebView* wkGui;                    ///< Pointer to webkit browser.
+    SpyWkBridge* bridge;                ///< Pointer to webkit javascript bridge.
+
+    // Tray icon:
+    QSystemTrayIcon* trayIcon;          ///< Pointer to the tray icon.
+    QIcon trayIconGraphic;              ///< Tray icon graphics.
+    QMenu* trayMenu;                    ///< Pointer to the tray menu.
+    QAction* addListenerPathsAction;
+    QAction* quitAction;
+    QAction* configureAction;
+    QAction* aboutAction;
+
 public:
     SubversionSpy(QWidget *parent = 0);
     ~SubversionSpy();
 
-private:
-    QVector<QString> listenerPaths;
-    QMutex listenerPathsMutex;
-    ThreadMonitor* monitor;
-    QVector<QThread>* svnWorkers;
-    QSystemTrayIcon* trayIcon;
-    QIcon trayIconGraphic;
-    QMenu* trayMenu;
+    /**
+     * Get listener paths.
+     * @param mutex Lock this mutex before using the returned pointer.
+     * @return pointer to listener paths vector.
+     */
+    QVector<QString>* getListenerPaths(QMutex **mutex);
 
-    QAction* addListenerPathsAction;
-    QAction* removeListenerPathsAction;
-    QAction* quitAction;
-    QAction* aboutAction;
+    /**
+     * Get notifications that have already been displayed.
+     * @param mutex Lock this mutex before using the returned pointer.
+     * @return pointer to notifications vector.
+     */
+    QVector<NotificationEntry>* getAllNotifications(QMutex **mutex);
+
+    /**
+     * Get certain amount of notifications that have already been displayed.
+     * No mutex required, but pointer returned must be freed.
+     * @param amount get n amount of the last logs added.
+     * @return pointer to notifications vector.
+     */
+    QVector<NotificationEntry>* getNNotifications(uint32_t amount);
+
+    /**
+     * Get certain amount of notifications that have already been displayed.
+     * No mutex required, but pointer returned must be freed.
+     * @param amount get n amount of logs.
+     * @param offset offset for logs.
+     * @return pointer to notifications vector.
+     */
+    QVector<NotificationEntry>* getNNotifications(uint32_t amount,
+                                                  uint32_t offset);
+
 
 public slots:
+    /**
+     * Add paths to the thread monitor.
+     */
     void addListenerPaths();
+
+    /**
+     * Remove the tray icon.
+     */
     void stopTray();
-    void errorString(QString err);
+
+    /**
+     * Display a tray notification with given type.
+     * @see SpyNotifications enumeration.
+     */
     void displayNotification(QString message, SpyNotifications type);
+
+    /**
+     * Opens the Webkit GUI.
+     */
+    void openWkGui();
+
 };
 }
 

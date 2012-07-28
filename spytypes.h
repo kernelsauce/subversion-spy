@@ -46,5 +46,13 @@ typedef struct {
     QStringList files;  /// Changed files during commit. TODO: change to vector.
 } SubversionLog;
 
+/**
+ * Container for a notification entry.
+ */
+typedef struct {
+    QString message;
+    SpyNotifications type;
+} NotificationEntry;
+
 }
 #endif // SPYTYPES_H
