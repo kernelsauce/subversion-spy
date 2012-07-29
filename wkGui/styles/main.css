@@ -2,6 +2,7 @@ body {
     background-color: white;
     margin: 0px;
     overflow: hidden;
+    font-size: 10px;
 }
 
 #menu{
@@ -11,10 +12,24 @@ body {
     float: left;
 }
 
-#maincontent{
+div.maincontent{
     width: 578px;
     height: 100%;
     float: right;
     background-color: #eee;
     padding: 10px;
+    display: none;
+}
+
+table{
+    font-size: 10px;
+}
+
+#listenersTable{
+    margin: 10px 0 0 0;
+}
+
+div.scrollable{
+    max-height: 200px;
+    overflow-x: auto;
 }

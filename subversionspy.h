@@ -35,7 +35,6 @@ private:
     QVector<QString> listenerPaths;     ///< Paths that the thread monitor will assign to workers.
     QMutex listenerPathsMutex;          ///< Lock this mutex when accessing listenerPaths.
     ThreadMonitor* monitor;             ///< Thread monitor for Subversion workers.
-    QVector<QThread>* svnWorkers;       ///< Vector of Subverson workers (threads).
     QVector<NotificationEntry> notiLog; ///< Vector of notification entries.
     QMutex notiLogMutex;                ///< Lock when accessing notiLog.
     QWebView* wkGui;                    ///< Pointer to webkit browser.
@@ -100,6 +99,11 @@ public:
      */
     uint32_t getPollRate();
 
+    /**
+     * Get the thread monitor.
+     * @returns pointer to the thread monitor.
+     */
+    ThreadMonitor* getThreadMonitor();
 
 public slots:
     /**

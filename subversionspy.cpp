@@ -45,7 +45,7 @@ SubversionSpy::SubversionSpy(QWidget *parent)
     connect(monitor, SIGNAL(sendNotifications(QString, SpyNotifications)), this, SLOT(displayNotification(QString,SpyNotifications)));
 
     trayIcon->show();
-    trayIcon->showMessage("Subversion Spy started!",  "Please add path observers from the tray icon.");
+    //trayIcon->showMessage("Subversion Spy started!",  "Please add path observers from the tray icon.");
     openWkGui();
 }
 
@@ -117,6 +117,11 @@ uint32_t SubversionSpy::getPollRate()
     pollRateReturn = pollRate;
     pollRateMutex.unlock();
     return pollRateReturn;
+}
+
+ThreadMonitor *SubversionSpy::getThreadMonitor()
+{
+    return monitor;
 }
 
 void SubversionSpy::addListenerPaths()

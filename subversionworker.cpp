@@ -95,7 +95,7 @@ bool SubversionWorker::initialLogFetch()
 
 void SubversionWorker::run()
 {
-    threadId = this->currentThreadId(); // TODO: surivive without mutex?
+    threadId = (uint32_t)this->currentThreadId(); // TODO: surivive without mutex?
 
     if (lastRevNumber == 0)
     {

@@ -69,7 +69,7 @@ bool SpyWkBridge::removeListenerPath(QString path)
     QMutex* listenerPathsMutex;
     QVector<QString>* listenerPaths = spy->getListenerPaths(&listenerPathsMutex);
 
-    uint32_t index = 0;
+    int32_t index = 0;
     listenerPathsMutex->lock();
     QVectorIterator<QString> listenerPathsIt(*listenerPaths);
 
@@ -77,7 +77,7 @@ bool SpyWkBridge::removeListenerPath(QString path)
     {
         if (listenerPathsIt.next() == path)
         {
-            listenerPaths->remove(index);
+            if (listenerPaths->size() > index) listenerPaths->remove(index); // Check boundary.
             listenerPathsMutex->unlock();
             return true;
         }
@@ -95,6 +95,11 @@ void SpyWkBridge::setPollRate(int seconds)
 int SpyWkBridge::getPollRate()
 {
     return spy->getPollRate();
+}
+
+QVariantMap SpyWkBridge::getThreadState()
+{
+    return spy->getThreadMonitor()->getThreadState();
 }
 
 }

@@ -34,3 +34,8 @@ Spy.getListenerPaths = function()
 {
     return SpyWkBridge.getListenerPaths();
 }
+
+Spy.openDirBrowser = function()
+{
+    return SpyWkBridge.openDirBrowser();
+}

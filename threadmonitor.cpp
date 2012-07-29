@@ -50,14 +50,22 @@ void ThreadMonitor::run()
 
         // Stop workers that no longer is in list.
         QVectorIterator<SubversionWorker*> workerIt(workerPool);
-        uint32_t index = 0;
+        int32_t index = 0;
         while (workerIt.hasNext())
         {
             SubversionWorker* workerInPool = workerIt.next();
             if (!inListenerPaths(workerInPool->getWorkingPath()))
             {
-                workerPool.remove(index);
-                delete workerInPool;
+                if (workerPool.size() > index) // Check if in range.
+                {
+                    listenerPathsMutex->unlock();
+                    workerPool.remove(index);
+                    delete workerInPool;
+                    listenerPathsMutex->lock();
+                }
+                else {
+                    break;
+                }
             }
             index++;
         }
@@ -96,6 +104,25 @@ inline bool ThreadMonitor::inListenerPaths(QString listenerPath)
         if (path.next() == listenerPath) exists = true;
     }
     return exists;
+}
+
+QVariantMap ThreadMonitor::getThreadState()
+{
+    QVariantMap threadsState;
+
+    QVectorIterator<SubversionWorker*> workerIt(workerPool);
+    while (workerIt.hasNext())
+    {
+        QVariantMap threadState;
+
+        SubversionWorker* workerInPool = workerIt.next();
+        threadState["state"] = workerInPool->getState();
+        threadState["id"] = workerInPool->getThreadId();
+
+        threadsState[workerInPool->getWorkingPath()] = threadState;
+    }
+
+    return threadsState;
 }
 
 } // namespace Spy

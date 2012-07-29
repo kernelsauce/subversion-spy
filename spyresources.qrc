@@ -16,5 +16,7 @@
         <file>wkGui/styles/main.css</file>
         <file>wkGui/js/spy.js</file>
         <file>wkGui/js/nav.js</file>
+        <file>wkGui/js/main.js</file>
+        <file>wkGui/js/repository.js</file>
     </qresource>
 </RCC>

@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QFileDialog>
+#include <QVariantMap>
 
 #include "spytypes.h"
 
@@ -30,6 +31,7 @@ public slots:
     bool removeListenerPath(QString path);
     void setPollRate(int seconds);
     int getPollRate();
+    QVariantMap getThreadState();
 };
 }
 #endif // SPYWKBRIDGE_H

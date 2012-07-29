@@ -9,8 +9,8 @@
         <div class="well" id="menu" style="padding: 8px 0;">
             <ul class="nav nav-list">
               <li class="nav-header">Operate</li>
-              <li class="active"><a href="#"><i class="icon-white icon-home"></i> Status</a></li>
-              <li><a href="#"><i class="icon-book"></i> Modify listener paths</a></li>
+              <li><a href="#"><i class="icon-home"></i> Status</a></li>
+              <li class="active"><a href="#"><i class="icon-white icon-book"></i> Subversion Repositories</a></li>
               <li><a href="#"><i class="icon-pencil"></i> Logs</a></li>
               <li class="nav-header">Configure</li>
               <li><a href="#"><i class="icon-user"></i> Profile</a></li>
@@ -20,14 +20,42 @@
             </ul>
         </div>
 
-        <div id="maincontent">
+        <div class="maincontent" id="status">
             <h4>No listeners - no status!</h4>
         </div>
+
+        <div class="maincontent" id="listeners">
+            <h6>Add or remove Subversion repositores.</h6>
+            <p>Either add local paths here with Subversion repositories in them, or add a remote destination. Surveillance of the repository is started immediately.</p>
+            <form class="well">
+                <input type="text" id="listenerPath" class="" placeholder="Remote or local path to repository" style="height: 24px;"><br />
+                <button class="btn btn-primary" id="addListenerAction"><i class="icon-eye-open icon-white"></i> Add repository</button>
+                <button class="btn" id="browseForPath"><i class="icon-folder-open"></i> Browse locally</button>
+                <br />
+                <div class="scrollable">
+                    <table class="table" id="listenersTable">
+                        <tr>
+                            <th>Path</th>
+                            <th></th>
+                        </tr>
+                        <tbody id="listenerPathsBody">
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+
+        <div class="maincontent" id="logs">
+        </div>
+
     </div>
     <script src="qrc:///wkGui/jquery"></script>
     <script src="bootstrap/js/bootstrap.js"></script>
     <script src="js/spy.js"></script>
     <script src="js/nav.js"></script>
+    <script src="js/repository.js"></script>
+    <script src="js/main.js"></script>
+    <script>main();</script>
     </body>
 </html>
 

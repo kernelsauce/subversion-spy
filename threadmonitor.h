@@ -22,6 +22,7 @@ public:
                   QMutex* pollRateMutex = NULL);
 
     ~ThreadMonitor();
+    QVariantMap getThreadState();
     
 signals:
     void finished();
