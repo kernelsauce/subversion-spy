@@ -32,10 +32,10 @@ private:
     QVector<QString>* listenerPaths;
     QMutex* listenerPathsMutex;
     QVector<SubversionWorker*> workerPool;
-    uint32_t* pollRate;
-    QMutex* pollRateMutex;
     bool kill;
     QMutex killMutex;
+    uint32_t* pollRate;
+    QMutex* pollRateMutex;
 
     SubversionWorker* findWorkerByWork(QString listenerPath);
     inline bool inListenerPaths(QString listenerPath);

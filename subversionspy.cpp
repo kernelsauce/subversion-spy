@@ -151,6 +151,10 @@ void SubversionSpy::displayNotification(QString message, SpyNotifications type)
     notiLogMutex.unlock();
 
     switch (type){
+    case N_PARSE_PROBLEMS:
+        trayIcon->showMessage("Subversion Spy - Parse Problems", message);
+        break;
+
     case N_UPDATED_REPOSITORY:
         trayIcon->showMessage("Subversion Spy - Updated Repository", message);
         break;
@@ -182,8 +186,9 @@ void SubversionSpy::openWkGui()
 
     wkGui->page()->mainFrame()->addToJavaScriptWindowObject("SpyWkBridge", bridge);
     wkGui->load(QUrl("qrc:///wkGui/wkGui/index.html"));
-    wkGui->setFixedSize(600, 300);
+    wkGui->setFixedSize(WK_WINDOW_WIDTH, WK_WINDOW_HEIGHT);
     wkGui->setWindowTitle(WK_WINDOW_NAME);
+    wkGui->setWindowIcon(QIcon(":/icons/icons/spy-icon.png"));
     wkGui->show();
 }
 

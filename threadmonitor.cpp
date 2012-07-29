@@ -41,7 +41,7 @@ void ThreadMonitor::run()
             QString listenerPath = listenerPathIt.next();
             if (findWorkerByWork(listenerPath) == NULL){
                 propagateNotifications("Added " + listenerPath + " to listener.", N_ADDED_REPOSITORY);
-                SubversionWorker* worker = new SubversionWorker(listenerPath);
+                SubversionWorker* worker = new SubversionWorker(listenerPath, pollRate, pollRateMutex);
                 workerPool.append(worker);
                 worker->start();
                 connect(worker, SIGNAL(giveUserFeedback(QString,SpyNotifications)), this, SLOT(propagateNotifications(QString,SpyNotifications)));

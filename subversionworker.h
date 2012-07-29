@@ -18,6 +18,8 @@ public:
                               QMutex* pollRateMutex = NULL);
     ~SubversionWorker();
     QString getWorkingPath();
+    SubversionWorkerState getState();
+    uint32_t getThreadId();
     
 private:
     SubversionParserSyncro parser;
@@ -28,9 +30,13 @@ private:
     QMutex* pollRateMutex;
     bool kill;
     QMutex killMutex;
+    SubversionWorkerState state;
+    QMutex stateMutex;
+    uint32_t threadId;
 
     void handleNewLogs(QVector<SubversionLog> *freshLogs);
     bool initialLogFetch();
+    void setState(SubversionWorkerState state);
 
 signals:
     void giveUserFeedback(QString message, SpyNotifications type);

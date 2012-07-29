@@ -1,15 +1,33 @@
 <html>
     <head>
         <link href="bootstrap/css/bootstrap.css" media="screen" rel="stylesheet" type="text/css" />
+        <link href="bootstrap/css/bootstrap-responsive.css" media="screen" rel="stylesheet" type="text/css" />
         <link href="styles/main.css" media="screen" rel="stylesheet" type="text/css" />
-        <script src="qrc:///wkGui/jquery"></script>
-        <script src="bootstrap/js/bootstrap.js"></script>
-        <script src="js/spy.js"></script>
     </head>
     <body>
-        <button class="btn btn-primary">Add listeners</button>
-        <button class="btn btn-danger">Remove listeners</button>
+    <div>
+        <div class="well" id="menu" style="padding: 8px 0;">
+            <ul class="nav nav-list">
+              <li class="nav-header">Operate</li>
+              <li class="active"><a href="#"><i class="icon-white icon-home"></i> Status</a></li>
+              <li><a href="#"><i class="icon-book"></i> Modify listener paths</a></li>
+              <li><a href="#"><i class="icon-pencil"></i> Logs</a></li>
+              <li class="nav-header">Configure</li>
+              <li><a href="#"><i class="icon-user"></i> Profile</a></li>
+              <li><a href="#"><i class="icon-cog"></i> Settings</a></li>
+              <li class="divider"></li>
+              <li><a href="#"><i class="icon-flag"></i> Help</a></li>
+            </ul>
+        </div>
 
+        <div id="maincontent">
+            <h4>No listeners - no status!</h4>
+        </div>
+    </div>
+    <script src="qrc:///wkGui/jquery"></script>
+    <script src="bootstrap/js/bootstrap.js"></script>
+    <script src="js/spy.js"></script>
+    <script src="js/nav.js"></script>
     </body>
 </html>
 

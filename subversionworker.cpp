@@ -9,13 +9,15 @@ SubversionWorker::SubversionWorker(QString path,
     lastRevNumber(0),
     path(path),
     pollRate(pollRate),
-    pollRateMutex(pollRateMutex),
     kill(false)
 {
+    this->pollRateMutex = pollRateMutex;
+    setState(S_WAIT);
 }
 
 SubversionWorker::~SubversionWorker()
 {
+    setState(S_DIEING);
     killMutex.lock();
     kill = true;
     killMutex.unlock();
@@ -27,8 +29,30 @@ QString SubversionWorker::getWorkingPath()
     return path;
 }
 
+SubversionWorkerState SubversionWorker::getState()
+{
+    SubversionWorkerState returnState;
+    stateMutex.lock();
+    returnState = state;
+    stateMutex.unlock();
+    return returnState;
+}
+
+uint32_t SubversionWorker::getThreadId()
+{
+    return threadId;
+}
+
+void SubversionWorker::setState(SubversionWorkerState state)
+{
+    stateMutex.lock();
+    this->state = state;
+    stateMutex.unlock();
+}
+
 void SubversionWorker::handleNewLogs(QVector<SubversionLog>* freshLogs)
 {
+    setState(S_UPDATING);
     if (!freshLogs->isEmpty())
     {
         svnLogs << *freshLogs;
@@ -37,13 +61,20 @@ void SubversionWorker::handleNewLogs(QVector<SubversionLog>* freshLogs)
         while (it.hasNext())
         {
             SubversionLog freshLog = it.next();
-            emit giveUserFeedback(freshLog.comment, N_NEW_REVISON); // TODO just a sample.
+            lastRevNumber = freshLog.revNumber;
+            emit giveUserFeedback(
+                        "Caught check in at " + path + ". \r\n\r\n"
+                        "Revision number: r" + QString::number(lastRevNumber) + "\r\n" +
+                        "Author: " + freshLog.author + "\r\n" +
+                        "Comment: " + freshLog.comment + "\r\n",
+                        N_UPDATED_REPOSITORY);
         }
     }
 }
 
 bool SubversionWorker::initialLogFetch()
 {
+    setState(S_UPDATING);
     QVector<SubversionLog> fullLog = parser.getLogs();
     if (fullLog.isEmpty()) return false; // Empty logs, just bail.
     svnLogs << fullLog; // Append to logs.
@@ -64,11 +95,15 @@ bool SubversionWorker::initialLogFetch()
 
 void SubversionWorker::run()
 {
+    threadId = this->currentThreadId(); // TODO: surivive without mutex?
+
     if (lastRevNumber == 0)
     {
         if (!parser.updatePath())
         {
-            throw E_NO_CONNECTION;
+            setState(S_ERROR);
+            emit giveUserFeedback("Could not update: " + path, N_NOT_SVN_DIR);
+            return;
         }
     }
 
@@ -85,7 +120,9 @@ void SubversionWorker::run()
             freshLogs = parser.getLogs(lastRevNumber + 1, -1);
         }
         catch(ParserException e){
-            qDebug() << "SubversionParser throw: " << e;
+            setState(S_ERROR);
+            emit giveUserFeedback("Error while parsing: " + path, N_PARSE_PROBLEMS);
+            break;
         }
 
         handleNewLogs(&freshLogs);
@@ -95,9 +132,11 @@ void SubversionWorker::run()
         if (!kill)
         {
             killMutex.unlock();
+            setState(S_WAIT);
             pollRateMutex->lock();
-            sleep((unsigned long)pollRate);
+            uint32_t currentPollRate = (unsigned long)pollRate;
             pollRateMutex->unlock();
+            sleep(currentPollRate);
         }
         else
         {

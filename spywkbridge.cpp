@@ -6,6 +6,11 @@ SpyWkBridge::SpyWkBridge(SubversionSpy *spy) : spy(spy)
 {
 }
 
+QString SpyWkBridge::openDirBrowser()
+{
+    return QFileDialog::getExistingDirectory();
+}
+
 void SpyWkBridge::sendNotification(QString message, int type)
 {
     this->spy->displayNotification(message, (SpyNotifications)type);

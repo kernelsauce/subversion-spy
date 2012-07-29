@@ -15,5 +15,6 @@
         <file alias="jquery">wkGui/3rdparty/jquery-1.7.2.min.js</file>
         <file>wkGui/styles/main.css</file>
         <file>wkGui/js/spy.js</file>
+        <file>wkGui/js/nav.js</file>
     </qresource>
 </RCC>

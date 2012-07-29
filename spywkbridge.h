@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QStringList>
+#include <QFileDialog>
 
 #include "spytypes.h"
 
@@ -21,6 +22,7 @@ private:
     SubversionSpy *spy;
     
 public slots:
+    QString openDirBrowser();
     void sendNotification(QString message, int type);
     QStringList getAllNotifications();
     QStringList getListenerPaths();
