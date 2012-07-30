@@ -26,6 +26,10 @@
 
 namespace Spy{
 
+/** @brief Main class of Subversion Spy.
+
+    One instance is one application :).
+ */
 class SubversionSpy : public QMainWindow
 {
     Q_OBJECT

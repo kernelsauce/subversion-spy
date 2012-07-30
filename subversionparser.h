@@ -29,16 +29,52 @@
 
 namespace Spy{
 
+/** @brief A command-line Subversion client parser.
+
+    As we don't want to maintain our own Subversion client we use the command-line client
+    to get information from repositories. The client will output XML to stdout if given
+    the correct parameters.
+
+    All work done in this class is done in-sync.
+ */
 class SubversionParserSyncro
 {
 public:
+    /**
+     * Create new Subversion parser.
+     * @param path Path to the repository. Either remote or local fs path.
+     * @param updateFirst Should the parser do "svn update" in constructor.
+     */
     SubversionParserSyncro(QString path, bool updateFirst);
+
+    /**
+     * Get logs from and to given revision.
+     * @param fromRev From revision. Use -1 if undefined.
+     * @param toRev To revision. Use -1 if undefined (i.e this means HEAD).
+     * @return Vector of Subversion logs.
+     */
     QVector<SubversionLog> getLogs(int64_t fromRev, int64_t toRev);
+
+    /**
+     * Get all logs since creation of repository.
+     * @return Vector of Subversion logs.
+     */
     QVector<SubversionLog> getLogs();
+
+    /**
+     * Update the repository. (svn update)
+     * @returns true on success else false.
+     */
     bool updatePath();
 
 private:
-    QString path;
+    QString path; ///< Path for the parser.
+
+    /**
+     * Parse a svn XML byte array.
+     * @param xmlData Pointer to xml byte array.
+     * @return Vector of Subversion logs.
+     */
     QVector<SubversionLog> parseLogs(const QByteArray* xmlData);
 
 };

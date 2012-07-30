@@ -37,11 +37,11 @@ enum SpyNotifications{
 };
 
 enum SubversionWorkerState{
-    S_UPDATING,
-    S_STOPPED,
-    S_ERROR,
-    S_WAIT,
-    S_DIEING
+    S_UPDATING,             ///< Thread is running a SVN process waiting for completion.
+    S_STOPPED,              ///< Thread has stopped.
+    S_ERROR,                ///< Thread has encountered a error.
+    S_WAIT,                 ///< Thread is sleeping according to poll rate.
+    S_DIEING                ///< Thread is being killed.
 };
 
 /**
