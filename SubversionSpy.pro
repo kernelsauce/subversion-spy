@@ -30,8 +30,7 @@ HEADERS  += subversionspy.h \
 RESOURCES += \
     spyresources.qrc
 
-FORMS += \
-    listenerpathform.ui
+FORMS +=
 
 OTHER_FILES += \
     wkGui/index.html \
