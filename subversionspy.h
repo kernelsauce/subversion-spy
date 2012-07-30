@@ -14,7 +14,6 @@
 #include <stdint.h>
 
 #include "spytypes.h"
-#include "listenerpathform.h"
 #include "subversionparser.h"
 #include "threadmonitor.h"
 #include "spywkbridge.h"
@@ -46,7 +45,6 @@ private:
     QSystemTrayIcon* trayIcon;          ///< Pointer to the tray icon.
     QIcon trayIconGraphic;              ///< Tray icon graphics.
     QMenu* trayMenu;                    ///< Pointer to the tray menu.
-    QAction* addListenerPathsAction;
     QAction* quitAction;
     QAction* configureAction;
     QAction* aboutAction;
@@ -106,11 +104,6 @@ public:
     ThreadMonitor* getThreadMonitor();
 
 public slots:
-    /**
-     * Add paths to the thread monitor.
-     */
-    void addListenerPaths();
-
     /**
      * Remove the tray icon.
      */

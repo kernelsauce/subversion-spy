@@ -15,7 +15,6 @@ SOURCES += main.cpp\
         subversionspy.cpp \
     subversionparser.cpp \
     spydb.cpp \
-    listenerpathform.cpp \
     threadmonitor.cpp \
     subversionworker.cpp \
     spywkbridge.cpp
@@ -23,7 +22,6 @@ SOURCES += main.cpp\
 HEADERS  += subversionspy.h \
     subversionparser.h \
     spydb.h \
-    listenerpathform.h \
     threadmonitor.h \
     subversionworker.h \
     spytypes.h \

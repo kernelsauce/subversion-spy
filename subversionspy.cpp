@@ -10,7 +10,6 @@ SubversionSpy::SubversionSpy(QWidget *parent)
 {
     trayIcon = new QSystemTrayIcon(trayIconGraphic, this);
     trayMenu = new QMenu(this);
-    addListenerPathsAction = new QAction("&Modify observers paths", this);
     configureAction = new QAction("&Configure", this);
     quitAction = new QAction("&Quit...", this);
     aboutAction = new QAction("&About", this);
@@ -18,7 +17,6 @@ SubversionSpy::SubversionSpy(QWidget *parent)
     /*
      * Add menu entries.
      */
-    trayMenu->addAction(addListenerPathsAction);
     trayMenu->addAction(configureAction);
     trayMenu->addSeparator();
     trayMenu->addAction(quitAction);
@@ -28,7 +26,6 @@ SubversionSpy::SubversionSpy(QWidget *parent)
      * Connect signals.
      */
     connect(quitAction, SIGNAL(triggered()), this, SLOT(stopTray()));
-    connect(addListenerPathsAction, SIGNAL(triggered()), this, SLOT(addListenerPaths()));
     connect(configureAction, SIGNAL(triggered()), this, SLOT(openWkGui()));
     trayIcon->setContextMenu(trayMenu);
 
@@ -54,7 +51,9 @@ SubversionSpy::~SubversionSpy()
     qDebug() << "Destructing SubversionSpy instance.";
     delete trayIcon;
     delete trayMenu;
-    delete addListenerPathsAction;
+    delete configureAction;
+    delete aboutAction;
+    delete quitAction;
     delete monitor;
 }
 
@@ -122,16 +121,6 @@ uint32_t SubversionSpy::getPollRate()
 ThreadMonitor *SubversionSpy::getThreadMonitor()
 {
     return monitor;
-}
-
-void SubversionSpy::addListenerPaths()
-{
-    ListenerPathForm* addForm = new ListenerPathForm(this,
-                                                     &listenerPaths,
-                                                     &listenerPathsMutex);
-
-    addForm->exec();
-    delete addForm;
 }
 
 void SubversionSpy::stopTray()
