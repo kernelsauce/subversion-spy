@@ -147,7 +147,7 @@ void SubversionWorker::run()
             killMutex.unlock();
             setState(S_WAIT);
             pollRateMutex->lock();
-            uint32_t currentPollRate = (unsigned long)pollRate;
+            uint32_t currentPollRate = *pollRate;
             pollRateMutex->unlock();
             sleep(currentPollRate);
         }

@@ -119,7 +119,7 @@ QVariantMap SpyWkBridge::getLogs(QString path)
 
         // Build details.
         QVariantMap details;
-        details["revNumber"] = currentLog.revNumber;
+        details["revNumber"] = (uint32_t)currentLog.revNumber;
         details["comment"] = currentLog.comment;
         details["author"] = currentLog.author;
         details["date"] = currentLog.date;
