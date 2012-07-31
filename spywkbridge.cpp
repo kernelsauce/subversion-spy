@@ -21,9 +21,9 @@ QStringList SpyWkBridge::getAllNotifications()
     QStringList notiLogsSList;
     QMutex* notiLogMutex;
 
-    QVector<NotificationEntry>* notiLogs = spy->getAllNotifications(&notiLogMutex);
+    NotificationVector* notiLogs = spy->getAllNotifications(&notiLogMutex);
     notiLogMutex->lock();
-    QVectorIterator<NotificationEntry> notiItr(*notiLogs);
+    NotificationIterator notiItr(*notiLogs);
 
     while (notiItr.hasNext())
     {

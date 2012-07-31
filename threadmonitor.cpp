@@ -49,7 +49,7 @@ void ThreadMonitor::run()
         }
 
         // Stop workers that no longer is in list.
-        QVectorIterator<SubversionWorker*> workerIt(workerPool);
+        SVNWorkerIterator workerIt(workerPool);
         int32_t index = 0;
         while (workerIt.hasNext())
         {
@@ -83,7 +83,7 @@ void ThreadMonitor::propagateNotifications(QString message, SpyNotifications typ
 
 SubversionWorker* ThreadMonitor::findWorkerByWork(QString listenerPath)
 {
-    QVectorIterator<SubversionWorker*> it(workerPool);
+    SVNWorkerIterator it(workerPool);
     while (it.hasNext())
     {
         SubversionWorker* worker = it.next();
@@ -110,7 +110,7 @@ QVariantMap ThreadMonitor::getThreadState()
 {
     QVariantMap threadsState;
 
-    QVectorIterator<SubversionWorker*> workerIt(workerPool);
+    SVNWorkerIterator workerIt(workerPool);
     while (workerIt.hasNext())
     {
         QVariantMap threadState;
@@ -125,10 +125,10 @@ QVariantMap ThreadMonitor::getThreadState()
     return threadsState;
 }
 
-QVector<SubversionLog> *ThreadMonitor::getLogsFromWorker(QString path, QMutex **vectorMutex)
+SVNLogVector *ThreadMonitor::getLogsFromWorker(QString path, QMutex **vectorMutex)
 {
     SubversionWorker* worker = findWorkerByWork(path);
-    QVector<SubversionLog>* svnLogs = worker->getLogs(vectorMutex);
+    SVNLogVector* svnLogs = worker->getLogs(vectorMutex);
     return svnLogs;
 }
 

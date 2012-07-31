@@ -52,7 +52,7 @@ public:
      * @param vectorMutex Lock this when accessing returned vector.
      * @returns Pointer to vector of SubversionLog structs.
      */
-    QVector<SubversionLog>* getLogsFromWorker(QString path, QMutex** vectorMutex);
+    SVNLogVector* getLogsFromWorker(QString path, QMutex** vectorMutex);
     
 signals:
     /**
@@ -65,7 +65,7 @@ signals:
 private:
     QVector<QString>* listenerPaths;        ///< Pointer to vector of paths.
     QMutex* listenerPathsMutex;             ///< Lock this when accessing listenerPaths.
-    QVector<SubversionWorker*> workerPool;  ///< Pool of subversion worker pointer's.
+    SVNWorkerPool workerPool;               ///< Pool of subversion worker pointer's.
     bool kill;                              ///< Kill switch for thread monitor.
     QMutex killMutex;                       ///< Lock this when accessing kill.
     uint32_t* pollRate;                     ///< Pointer to poll rate setting.

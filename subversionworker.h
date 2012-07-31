@@ -56,11 +56,11 @@ public:
      * @param mutex Lock this when accessing the returned pointer.
      * @return Pointer to QVector.
      */
-    QVector<SubversionLog>* getLogs(QMutex** vectorMutex);
+    SVNLogVector* getLogs(QMutex** vectorMutex);
     
 private:
     SubversionParserSyncro parser;      ///< Instance of a SubversionParser class, being used.
-    QVector<SubversionLog> svnLogs;     ///< Vector of subversion logs. Contains all logs every fetched.
+    SVNLogVector svnLogs;               ///< Vector of subversion logs. Contains all logs every fetched.
     QMutex svnLogsMutex;                ///< Lock this when accessing svnLogs.
     uint64_t lastRevNumber;             ///< Last revision number fetched from repository.
     QString path;                       ///< The path to the repository.
@@ -76,7 +76,7 @@ private:
      * Called when the worker has fetched logs.
      * @param freshLogs Pointer to vector of logs.
      */
-    void handleNewLogs(QVector<SubversionLog> *freshLogs);
+    void handleNewLogs(SVNLogVector* freshLogs);
 
     /**
      * Called by thread before entering event loop to get all data from the

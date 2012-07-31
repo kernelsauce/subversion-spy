@@ -38,7 +38,7 @@ private:
     QVector<QString> listenerPaths;     ///< Paths that the thread monitor will assign to workers.
     QMutex listenerPathsMutex;          ///< Lock this mutex when accessing listenerPaths.
     ThreadMonitor* monitor;             ///< Thread monitor for Subversion workers.
-    QVector<NotificationEntry> notiLog; ///< Vector of notification entries.
+    NotificationVector notiLog;         ///< Vector of notification entries.
     QMutex notiLogMutex;                ///< Lock when accessing notiLog.
     QWebView* wkGui;                    ///< Pointer to webkit browser.
     SpyWkBridge* bridge;                ///< Pointer to webkit javascript bridge.
@@ -69,7 +69,7 @@ public:
      * @param mutex Lock this mutex before using the returned pointer.
      * @return pointer to notifications vector.
      */
-    QVector<NotificationEntry>* getAllNotifications(QMutex **mutex);
+    NotificationVector* getAllNotifications(QMutex **mutex);
 
     /**
      * Get certain amount of notifications that have already been displayed.
@@ -77,7 +77,7 @@ public:
      * @param amount get n amount of the last logs added.
      * @return pointer to notifications vector.
      */
-    QVector<NotificationEntry>* getNNotifications(uint32_t amount);
+    NotificationVector* getNNotifications(uint32_t amount);
 
     /**
      * Get certain amount of notifications that have already been displayed.
@@ -86,7 +86,7 @@ public:
      * @param offset offset for logs.
      * @return pointer to notifications vector.
      */
-    QVector<NotificationEntry>* getNNotifications(uint32_t amount,
+    NotificationVector* getNNotifications(uint32_t amount,
                                                   uint32_t offset);
 
     /**

@@ -43,7 +43,7 @@ uint32_t SubversionWorker::getThreadId()
     return threadId;
 }
 
-QVector<SubversionLog>* SubversionWorker::getLogs(QMutex** vectorMutex)
+SVNLogVector* SubversionWorker::getLogs(QMutex** vectorMutex)
 {
     *vectorMutex = &svnLogsMutex;
     return &svnLogs;
@@ -56,7 +56,7 @@ void SubversionWorker::setState(SubversionWorkerState state)
     stateMutex.unlock();
 }
 
-void SubversionWorker::handleNewLogs(QVector<SubversionLog>* freshLogs)
+void SubversionWorker::handleNewLogs(SVNLogVector* freshLogs)
 {
     setState(S_UPDATING);
     if (!freshLogs->isEmpty())
@@ -66,7 +66,7 @@ void SubversionWorker::handleNewLogs(QVector<SubversionLog>* freshLogs)
         svnLogsMutex.unlock();
 
         // New logs incoming!
-        QVectorIterator<SubversionLog> it(*freshLogs);
+        SVNLogIterator it(*freshLogs);
         while (it.hasNext())
         {
             SubversionLog freshLog = it.next();
@@ -84,7 +84,7 @@ void SubversionWorker::handleNewLogs(QVector<SubversionLog>* freshLogs)
 bool SubversionWorker::initialLogFetch()
 {
     setState(S_UPDATING);
-    QVector<SubversionLog> fullLog = parser.getLogs();
+    SVNLogVector fullLog = parser.getLogs();
     if (fullLog.isEmpty()) return false; // Empty logs, just bail.
 
     svnLogsMutex.lock();

@@ -63,13 +63,13 @@ QVector<QString> *SubversionSpy::getListenerPaths(QMutex** mutex)
     return &listenerPaths;
 }
 
-QVector<NotificationEntry> *SubversionSpy::getAllNotifications(QMutex **mutex)
+NotificationVector *SubversionSpy::getAllNotifications(QMutex **mutex)
 {
     *mutex = &notiLogMutex;
     return &notiLog;
 }
 
-QVector<NotificationEntry> *SubversionSpy::getNNotifications(uint32_t amount)
+NotificationVector *SubversionSpy::getNNotifications(uint32_t amount)
 {
     notiLogMutex.lock();
     uint32_t notiLogSize = notiLog.size();
@@ -77,9 +77,9 @@ QVector<NotificationEntry> *SubversionSpy::getNNotifications(uint32_t amount)
     return getNNotifications(amount, amount - notiLogSize);
 }
 
-QVector<NotificationEntry> *SubversionSpy::getNNotifications(uint32_t amount, uint32_t offset)
+NotificationVector *SubversionSpy::getNNotifications(uint32_t amount, uint32_t offset)
 {
-    QVector<NotificationEntry>* notiLogCopy = new QVector<NotificationEntry>;
+    NotificationVector* notiLogCopy = new NotificationVector;
 
     notiLogMutex.lock();
     uint32_t notiLogSize = notiLog.size();
