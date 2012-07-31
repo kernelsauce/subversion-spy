@@ -18,5 +18,6 @@
         <file>wkGui/js/nav.js</file>
         <file>wkGui/js/main.js</file>
         <file>wkGui/js/repository.js</file>
+        <file>wkGui/js/settings.js</file>
     </qresource>
 </RCC>

@@ -43,6 +43,12 @@ uint32_t SubversionWorker::getThreadId()
     return threadId;
 }
 
+QVector<SubversionLog>* SubversionWorker::getLogs(QMutex** vectorMutex)
+{
+    *vectorMutex = &svnLogsMutex;
+    return &svnLogs;
+}
+
 void SubversionWorker::setState(SubversionWorkerState state)
 {
     stateMutex.lock();
@@ -55,7 +61,10 @@ void SubversionWorker::handleNewLogs(QVector<SubversionLog>* freshLogs)
     setState(S_UPDATING);
     if (!freshLogs->isEmpty())
     {
+        svnLogsMutex.lock();
         svnLogs << *freshLogs;
+        svnLogsMutex.unlock();
+
         // New logs incoming!
         QVectorIterator<SubversionLog> it(*freshLogs);
         while (it.hasNext())
@@ -77,7 +86,10 @@ bool SubversionWorker::initialLogFetch()
     setState(S_UPDATING);
     QVector<SubversionLog> fullLog = parser.getLogs();
     if (fullLog.isEmpty()) return false; // Empty logs, just bail.
+
+    svnLogsMutex.lock();
     svnLogs << fullLog; // Append to logs.
+    svnLogsMutex.unlock();
 
     SubversionLog lastLog = fullLog.front();
     lastRevNumber = lastLog.revNumber;
@@ -121,7 +133,8 @@ void SubversionWorker::run()
         }
         catch(ParserException e){
             setState(S_ERROR);
-            emit giveUserFeedback("Error while parsing: " + path, N_PARSE_PROBLEMS);
+            emit giveUserFeedback("Exception: " + QString::number(e) +
+                                  " while parsing: " + path, N_PARSE_PROBLEMS);
             break;
         }
 

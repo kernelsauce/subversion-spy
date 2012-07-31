@@ -43,6 +43,16 @@ public:
      * @see SubversionWorkerState
      */
     QVariantMap getThreadState();
+
+    /**
+     * Get all logs from specified worker.
+     * Since we are working on a shared vector, caller must lock the mutex before
+     * accessing it.
+     * @param path Path monitored by worker.
+     * @param vectorMutex Lock this when accessing returned vector.
+     * @returns Pointer to vector of SubversionLog structs.
+     */
+    QVector<SubversionLog>* getLogsFromWorker(QString path, QMutex** vectorMutex);
     
 signals:
     /**

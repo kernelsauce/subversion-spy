@@ -38,4 +38,5 @@ OTHER_FILES += \
     wkGui/js/spy.js \
     wkGui/js/nav.js \
     wkGui/js/main.js \
-    wkGui/js/repository.js
+    wkGui/js/repository.js \
+    wkGui/js/settings.js

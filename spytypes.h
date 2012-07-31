@@ -2,6 +2,8 @@
 #define SPYTYPES_H
 #include <QStringList>
 #include <QString>
+#include <QVectorIterator>
+
 #include <stdint.h>
 
 namespace Spy{
@@ -44,24 +46,24 @@ enum SubversionWorkerState{
     S_DIEING                ///< Thread is being killed.
 };
 
-/**
- * Container for a single Subversion commit/log.
- */
+/** @brief Container for a single Subversion commit/log. */
 typedef struct {
     uint64_t revNumber; ///< Revision number.
     QString comment;    ///< Author comment.
     QString author;     ///< Author's username.
     QString date;       ///< Date of commit.
-    QStringList files;  ///< Changed files during commit. TODO: change to vector.
-} SubversionLog;
+    QStringList files;  ///< Changed files during commit.
+}   SubversionLog;
 
-/**
- * Container for a notification entry.
- */
+/** @brief Container for a notification entry. */
 typedef struct {
-    QString message;
-    SpyNotifications type;
+    QString message;        ///< Notification message.
+    SpyNotifications type;  ///< Notification type from SpyNotifications enumeration.
 } NotificationEntry;
+
+// Convinience types :-).
+typedef QVector<SubversionLog> SVNLogVector;
+typedef QVectorIterator<SubversionLog> SVNLogIterator;
 
 }
 #endif // SPYTYPES_H

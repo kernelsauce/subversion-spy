@@ -18,13 +18,10 @@ nav.goto = function(page, item)
     {
         var jItem = $(item);
         jItem.parent().addClass("active");
-        console.log(jItem);
         jItem.find("i").addClass("icon-white");
     }
     page.show();
 }
-
-nav.goto(nav.listenersPage);
 
 nav.switchToWhiteIcon = function(item)
 {

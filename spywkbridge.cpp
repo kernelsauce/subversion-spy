@@ -102,4 +102,34 @@ QVariantMap SpyWkBridge::getThreadState()
     return spy->getThreadMonitor()->getThreadState();
 }
 
+QVariantMap SpyWkBridge::getLogs(QString path)
+{
+    QVariantMap fullLogList;
+
+    QMutex* vectorMutex = NULL;
+    SVNLogVector* logs = spy->getThreadMonitor()->getLogsFromWorker(path, &vectorMutex);
+
+    vectorMutex->lock();
+
+    // Build our big monster log blob.
+    SVNLogIterator logItr(*logs);
+    while (logItr.hasNext())
+    {
+        SubversionLog currentLog = logItr.next();
+
+        // Build details.
+        QVariantMap details;
+        details["revNumber"] = currentLog.revNumber;
+        details["comment"] = currentLog.comment;
+        details["author"] = currentLog.author;
+        details["date"] = currentLog.date;
+        details["files"] = currentLog.files;
+
+        fullLogList[QString::number(currentLog.revNumber)] = details;
+    }
+    vectorMutex->unlock();
+
+    return fullLogList;
+}
+
 }

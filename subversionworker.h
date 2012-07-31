@@ -47,10 +47,21 @@ public:
      * @return Internal Thread ID.
      */
     uint32_t getThreadId();
+
+
+    /**
+     * Get logs processed by the worker.
+     * As we are returning a reference to the vector off logs, the caller must
+     * lock the mutex before accessing returned pointer.
+     * @param mutex Lock this when accessing the returned pointer.
+     * @return Pointer to QVector.
+     */
+    QVector<SubversionLog>* getLogs(QMutex** vectorMutex);
     
 private:
     SubversionParserSyncro parser;      ///< Instance of a SubversionParser class, being used.
     QVector<SubversionLog> svnLogs;     ///< Vector of subversion logs. Contains all logs every fetched.
+    QMutex svnLogsMutex;                ///< Lock this when accessing svnLogs.
     uint64_t lastRevNumber;             ///< Last revision number fetched from repository.
     QString path;                       ///< The path to the repository.
     uint32_t* pollRate;                 ///< Poll rate setting.

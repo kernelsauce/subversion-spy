@@ -33,14 +33,20 @@
         </div>
 
         <div class="maincontent" id="settings">
-            <h4>:)</h4>
+            <h6>Fine tune your experience!</h6>
+            <form class="well">
+                <label>How often should repositories be probed for changes (in seconds)?</label>
+                <input type="number" id="pollRate" style="height:25px;"></input>
+                <br />
+                <button class="btn btn-primary" id="setSettings"><i class="icon-ok icon-white"></i> Set</button>
+            </form>
         </div>
 
         <div class="maincontent" id="listeners">
             <h6>Add or remove Subversion repositores.</h6>
             <p>Either add local paths here with Subversion repositories in them, or add a remote destination. Surveillance of the repository is started immediately.</p>
             <form class="well">
-                <input type="text" id="listenerPath" class="" placeholder="Remote or local path to repository" style="height: 24px;"><br />
+                <input type="text" id="listenerPath" class="" placeholder="Remote or local path..." style="height: 24px;"><br />
                 <button class="btn btn-primary" id="addListenerAction"><i class="icon-eye-open icon-white"></i> Add repository</button>
                 <button class="btn" id="browseForPath"><i class="icon-folder-open"></i> Browse locally</button>
                 <br />
@@ -66,6 +72,7 @@
     <script src="js/spy.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/repository.js"></script>
+    <script src="js/settings.js"></script>
     <script src="js/main.js"></script>
     <script>main();</script>
     </body>

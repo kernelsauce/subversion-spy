@@ -125,4 +125,11 @@ QVariantMap ThreadMonitor::getThreadState()
     return threadsState;
 }
 
+QVector<SubversionLog> *ThreadMonitor::getLogsFromWorker(QString path, QMutex **vectorMutex)
+{
+    SubversionWorker* worker = findWorkerByWork(path);
+    QVector<SubversionLog>* svnLogs = worker->getLogs(vectorMutex);
+    return svnLogs;
+}
+
 } // namespace Spy
