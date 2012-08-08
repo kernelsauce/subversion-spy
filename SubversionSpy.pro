@@ -39,4 +39,6 @@ OTHER_FILES += \
     wkGui/js/nav.js \
     wkGui/js/main.js \
     wkGui/js/repository.js \
-    wkGui/js/settings.js
+    wkGui/js/settings.js \
+    wkGui/js/status.js \
+    wkGui/js/logs.js

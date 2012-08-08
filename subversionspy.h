@@ -22,7 +22,7 @@
 #define WK_WINDOW_NAME "Subversion Spy Configuration"
 #define WK_WINDOW_HEIGHT 400
 #define WK_WINDOW_WIDTH 800
-#define THREAD_POLL_RATE 10
+#define THREAD_POLL_RATE 30
 
 namespace Spy{
 

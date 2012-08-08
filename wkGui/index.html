@@ -2,6 +2,7 @@
     <head>
         <link href="bootstrap/css/bootstrap.css" media="screen" rel="stylesheet" type="text/css" />
         <link href="bootstrap/css/bootstrap-responsive.css" media="screen" rel="stylesheet" type="text/css" />
+        <link href="datatables/jquery.dataTables.css" media="screen" rel="stylesheet" type="text/css" />
         <link href="styles/main.css" media="screen" rel="stylesheet" type="text/css" />
     </head>
     <body>
@@ -21,7 +22,7 @@
         </div>
 
         <div class="maincontent" id="status">
-            <h4>No listeners - no status!</h4>
+            <h6>Listener summary</h6>
         </div>
 
         <div class="maincontent" id="about">
@@ -64,15 +65,21 @@
         </div>
 
         <div class="maincontent" id="logs">
+            <h6>Pick a repository</h6>
+            <p>Browse recent and old check in's made to repositories.</p>
+            <ul class="well" id="repository_logs_list"></ul>
         </div>
 
     </div>
     <script src="qrc:///wkGui/jquery"></script>
     <script src="bootstrap/js/bootstrap.js"></script>
+    <script src="datatables/jquery.dataTables.min.js"></script>
     <script src="js/spy.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/repository.js"></script>
+    <script src="js/logs.js"></script>
     <script src="js/settings.js"></script>
+    <script src="js/status.js"></script>
     <script src="js/main.js"></script>
     <script>main();</script>
     </body>

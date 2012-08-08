@@ -19,5 +19,21 @@
         <file>wkGui/js/main.js</file>
         <file>wkGui/js/repository.js</file>
         <file>wkGui/js/settings.js</file>
+        <file>wkGui/js/status.js</file>
+        <file>wkGui/datatables/back_disabled.png</file>
+        <file>wkGui/datatables/back_enabled.png</file>
+        <file>wkGui/datatables/back_enabled_hover.png</file>
+        <file>wkGui/datatables/forward_disabled.png</file>
+        <file>wkGui/datatables/forward_enabled.png</file>
+        <file>wkGui/datatables/forward_enabled_hover.png</file>
+        <file>wkGui/datatables/jquery.dataTables.css</file>
+        <file>wkGui/datatables/jquery.dataTables.min.js</file>
+        <file>wkGui/datatables/jquery.dataTables_themeroller.css</file>
+        <file>wkGui/datatables/sort_asc.png</file>
+        <file>wkGui/datatables/sort_asc_disabled.png</file>
+        <file>wkGui/datatables/sort_both.png</file>
+        <file>wkGui/datatables/sort_desc.png</file>
+        <file>wkGui/datatables/sort_desc_disabled.png</file>
+        <file>wkGui/js/logs.js</file>
     </qresource>
 </RCC>

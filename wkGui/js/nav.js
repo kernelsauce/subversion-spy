@@ -38,6 +38,7 @@ $("#svnrepos_link").live("click", function(){
 
 $("#logs_link").live("click", function(){
    nav.goto(nav.logsPage, this);
+   Logs.listRepositories();
 })
 
 $("#settings_link").live("click", function(){
