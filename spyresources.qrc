@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/icons">
         <file>icons/spy-icon.png</file>
+        <file>icons/spy-icon.svg</file>
     </qresource>
     <qresource prefix="/wkGui">
         <file>wkGui/index.html</file>
@@ -35,5 +36,6 @@
         <file>wkGui/datatables/sort_desc.png</file>
         <file>wkGui/datatables/sort_desc_disabled.png</file>
         <file>wkGui/js/logs.js</file>
+        <file>icons/spy-icon.svg</file>
     </qresource>
 </RCC>

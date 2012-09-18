@@ -14,14 +14,12 @@ QMAKE_LFLAGS +=
 SOURCES += main.cpp\
         subversionspy.cpp \
     subversionparser.cpp \
-    spydb.cpp \
     threadmonitor.cpp \
     subversionworker.cpp \
     spywkbridge.cpp
 
 HEADERS  += subversionspy.h \
     subversionparser.h \
-    spydb.h \
     threadmonitor.h \
     subversionworker.h \
     spytypes.h \

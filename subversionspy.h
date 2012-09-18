@@ -96,7 +96,7 @@ public:
      * Set the poll rate of the listener threads.
      * @param seconds Wait n amount seconds before doing a recheck.
      */
-    void setpollrate(uint32_t seconds);
+    void setpollrate(uint32_t secs);
 
     /**
      * Get current poll rate of the listener threads;

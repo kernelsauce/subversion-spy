@@ -6,7 +6,7 @@ SubversionSpy::SubversionSpy(QWidget *parent) :
     QMainWindow(parent),
     wk_gui(0),
     p_rate(THREAD_POLL_RATE),
-    _tray_graphics(QIcon(":/icons/icons/spy-icon.png"))
+    _tray_graphics(QIcon(":/icons/icons/spy-icon.svg"))
 {
     tray = new QSystemTrayIcon(_tray_graphics, this);
     tray_menu = new QMenu(this);
@@ -38,11 +38,10 @@ SubversionSpy::SubversionSpy(QWidget *parent) :
     monitor->start();
 
     qRegisterMetaType<SpyNotifications>("SpyNotifications"); // Register our enum as meta type to allow signal and slots with the type.
-    connect(monitor, SIGNAL(sendNotifications(QString, SpyNotifications)), this, SLOT(displaynotific(QString,SpyNotifications)));
+    connect(monitor, SIGNAL(send_notif(QString,SpyNotifications)), this, SLOT(displaynotific(QString,SpyNotifications)));
 
     restore_listen_paths();
     tray->show();
-    open_wk_gui();
 }
 
 SubversionSpy::~SubversionSpy()
@@ -75,7 +74,7 @@ bool SubversionSpy::save_listen_paths()
     if (paths){
         QVectorIterator<QString> path_itr(*paths);
         while (path_itr.hasNext()){
-            compat_list.append(path_itr.next());
+            compat_list << path_itr.next();
         }
 
         cfg.setValue("paths", compat_list);
@@ -91,9 +90,8 @@ void SubversionSpy::restore_listen_paths()
     QStringList compat_list = cfg.value("paths").toStringList();
 
     listenpathsmutex.lock();
-    QStringListIterator compat_list_itr(compat_list);
-    if (compat_list_itr.hasNext()){
-        listenpaths.append(compat_list_itr.next());
+    for (int32_t i = 0; i < compat_list.size(); i++){
+        listenpaths << compat_list[i];
     }
     listenpathsmutex.unlock();
 }
@@ -107,24 +105,24 @@ QVector<NotificationEntry> *SubversionSpy::get_all_notific(QMutex **mutex)
 QVector<NotificationEntry> *SubversionSpy::get_n_notific(uint32_t amount)
 {
     notilogs_mutex.lock();
-    uint32_t notiLogSize = notilogs.size();
+    size_t log_size = notilogs.size();
     notilogs_mutex.unlock();
-    return get_n_notific(amount, amount - notiLogSize);
+    return get_n_notific(amount, amount - log_size);
 }
 
 QVector<NotificationEntry> *SubversionSpy::get_n_notific(uint32_t amount, uint32_t offset)
 {
-    QVector<NotificationEntry> *notiLogCopy = new QVector<NotificationEntry>;
+    QVector<NotificationEntry> *log_copy = new QVector<NotificationEntry>;
 
     notilogs_mutex.lock();
-    uint32_t notiLogSize = notilogs.size();
+    size_t log_size = notilogs.size();
 
     // Deep copy of selected notifications logs.
-    for (uint32_t index = offset; index < amount; index++)
+    for (size_t i = offset; i < amount; i++)
     {
-        if (index < notiLogSize)
+        if (i < log_size)
         {
-            notiLogCopy->append(notilogs[index]);
+            log_copy->append(notilogs[i]);
         }
         else
         {
@@ -134,23 +132,24 @@ QVector<NotificationEntry> *SubversionSpy::get_n_notific(uint32_t amount, uint32
     }
 
     notilogs_mutex.unlock();
-    return notiLogCopy;
+    return log_copy;
 }
 
-void SubversionSpy::setpollrate(uint32_t seconds)
+void SubversionSpy::setpollrate(uint32_t secs)
 {
     p_rate_mutex.lock();
-    p_rate = seconds;
+    p_rate = secs;
     p_rate_mutex.unlock();
 }
 
 uint32_t SubversionSpy::getpollrate()
 {
-    uint32_t pollRateReturn;
+    uint32_t p_rate_retn = 0;
+
     p_rate_mutex.lock();
-    pollRateReturn = p_rate;
+    p_rate_retn = p_rate;
     p_rate_mutex.unlock();
-    return pollRateReturn;
+    return p_rate_retn;
 }
 
 ThreadMonitor *SubversionSpy::get_threadmonitor()
@@ -164,13 +163,14 @@ void SubversionSpy::stop_tray()
     tray->hide();
     tray_menu->close();
     close();
-    qApp->exit(0);
+    qApp->quit();
 }
 
 void SubversionSpy::displaynotific(QString msg, SpyNotifications type)
 {
     // Is there a message?
-    if (msg.size() <= 0) return;
+    if (msg.size() <= 0)
+        return;
 
     // Add to notification log.
     NotificationEntry new_entry;

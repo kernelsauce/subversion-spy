@@ -30,10 +30,10 @@ public:
      * @param pollRate Pointer to poll rate setting.
      * @param pollRateMutex Pointer to poll rate mutex.
      */
-    ThreadMonitor(QVector<QString>* listenerPaths = NULL,
-                  QMutex* listenerPathsMutex = NULL,
-                  uint32_t* pollRate = NULL,
-                  QMutex* pollRateMutex = NULL,
+    ThreadMonitor(QVector<QString>* listener_paths = 0,
+                  QMutex* listener_paths_mutex = 0,
+                  uint32_t* p_rate = 0,
+                  QMutex* p_rate_mutex = 0,
                   QObject* parent = 0);
 
     ~ThreadMonitor();
@@ -43,7 +43,7 @@ public:
      * @returns Hashmap with different data.
      * @see SubversionWorkerState
      */
-    QVariantMap getThreadState();
+    QVariantMap get_threads_state();
 
     /**
      * Get all logs from specified worker.
@@ -53,7 +53,7 @@ public:
      * @param vectorMutex Lock this when accessing returned vector.
      * @returns Pointer to vector of SubversionLog structs.
      */
-    QVector<SubversionLog>* getLogsFromWorker(QString path, QMutex** vectorMutex);
+    QVector<SubversionLog>* get_worker_logs(QString path, QMutex** vector_mutex);
     
 signals:
     /**
@@ -61,33 +61,33 @@ signals:
      * @param message The notification message to post.
      * @param type The type of notification your are posting.
      */
-    void sendNotifications(QString msg, SpyNotifications type);
+    void send_notif(QString msg, SpyNotifications type);
 
 private:
-    QVector<QString>* listenerPaths;        ///< Pointer to vector of paths.
-    QMutex* listenerPathsMutex;             ///< Lock this when accessing listenerPaths.
-    QVector<SubversionWorker*> workerPool;  ///< Pool of subversion worker pointer's.
-    bool kill;                              ///< Kill switch for thread monitor.
-    QMutex killMutex;                       ///< Lock this when accessing kill.
-    uint32_t* pollRate;                     ///< Pointer to poll rate setting.
-    QMutex* pollRateMutex;                  ///< Lock this when accessing pollRate.
+    QVector<QString>* listener_paths;           ///< Pointer to vector of paths.
+    QMutex* listener_paths_mutex;               ///< Lock this when accessing listenerPaths.
+    QVector<SubversionWorker*> worker_pool;     ///< Pool of subversion worker pointer's.
+    bool kill;                                  ///< Kill switch for thread monitor.
+    QMutex kill_mutex;                          ///< Lock this when accessing kill.
+    uint32_t* p_rate;                           ///< Pointer to poll rate setting.
+    QMutex* p_rate_mutex;                       ///< Lock this when accessing pollRate.
 
     /**
      * Find a worker by specified path.
      * @param listenerPath Specified path to search for.
      * @returns Pointer to subversion worker or NULL if no worker found.
      */
-    SubversionWorker* findWorkerByWork(QString listenerPath);
+    SubversionWorker* get_worker_by_work(QString listenerPath);
 
     /**
      * Check if a given path is in the vector of paths.
      * @parm listenerPath Specified path to search for.
      * @returns true if given path is in the vector else false.
      */
-    inline bool inListenerPaths(QString listenerPath);
+    inline bool is_in_pool(QString listenerPath);
 
 public slots:
-    void propagateNotifications(QString msg, SpyNotifications type);
+    void propagate_notif(QString msg, SpyNotifications type);
 
 protected:
     void run();

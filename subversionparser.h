@@ -45,7 +45,7 @@ public:
      * @param path Path to the repository. Either remote or local fs path.
      * @param updateFirst Should the parser do "svn update" in constructor.
      */
-    SubversionParserSyncro(QString path, bool updateFirst);
+    SubversionParserSyncro(QString path, bool update_first);
 
     /**
      * Get logs from and to given revision.
@@ -53,19 +53,19 @@ public:
      * @param toRev To revision. Use -1 if undefined (i.e this means HEAD).
      * @return Vector of Subversion logs.
      */
-    QVector<SubversionLog> getLogs(int64_t fromRev, int64_t toRev);
+    QVector<SubversionLog> get_logs(int64_t from, int64_t to);
 
     /**
      * Get all logs since creation of repository.
      * @return Vector of Subversion logs.
      */
-    QVector<SubversionLog> getLogs();
+    QVector<SubversionLog> get_logs();
 
     /**
      * Update the repository. (svn update)
      * @returns true on success else false.
      */
-    bool updatePath();
+    bool update();
 
 private:
     QString path; ///< Path for the parser.
@@ -75,7 +75,7 @@ private:
      * @param xmlData Pointer to xml byte array.
      * @return Vector of Subversion logs.
      */
-    QVector<SubversionLog> parseLogs(const QByteArray* xmlData);
+    QVector<SubversionLog> parse_logs(const QByteArray* xml);
 
 };
 

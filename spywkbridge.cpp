@@ -103,7 +103,7 @@ int SpyWkBridge::getPollRate()
 
 QVariantMap SpyWkBridge::getThreadState()
 {
-    return spy->get_threadmonitor()->getThreadState();
+    return spy->get_threadmonitor()->get_threads_state();
 }
 
 QVariantMap SpyWkBridge::getLogs(QString path)
@@ -111,7 +111,7 @@ QVariantMap SpyWkBridge::getLogs(QString path)
     QVariantMap fullLogList;
 
     QMutex* vectorMutex = 0;
-    QVector<SubversionLog>* logs = spy->get_threadmonitor()->getLogsFromWorker(path, &vectorMutex);
+    QVector<SubversionLog>* logs = spy->get_threadmonitor()->get_worker_logs(path, &vectorMutex);
 
     vectorMutex->lock();
 

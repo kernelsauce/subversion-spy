@@ -10,16 +10,17 @@ static const QString svnXmlRevKey = SVN_XML_REVISION;
 static const QString svnXmlPathsKey = SVN_XML_PATHS;
 static const QString svnXmlPathKey = SVN_XML_PATH;
 
-SubversionParserSyncro::SubversionParserSyncro(QString path, bool updateFirst) : path(path)
+SubversionParserSyncro::SubversionParserSyncro(QString path, bool update_first) :
+    path(path)
 {
     qDebug() << "SubversionParserSyncro constructed.";
-    if (updateFirst) updatePath();
+    if (update_first) update();
 }
 
-QVector<SubversionLog> SubversionParserSyncro::getLogs(int64_t fromRev, int64_t toRev)
+QVector<SubversionLog> SubversionParserSyncro::get_logs(int64_t from, int64_t to)
 {
-    QProcess svnProc;
-    QString executeCmd = QString().
+    QProcess svn_proc;
+    QString execute_cmd = QString().
             append(SVN_LOG).
             append(SPACE).
             append(SVN_XML_OPT).
@@ -27,37 +28,37 @@ QVector<SubversionLog> SubversionParserSyncro::getLogs(int64_t fromRev, int64_t 
             append(SVN_VERBOSE_OPT);
 
     // Are we getting specified revision or not?
-    if ( !(fromRev == -1 && toRev == -1) )
+    if ( !(from == -1 && to == -1) )
     {
-        executeCmd.
+        execute_cmd.
                 append(SPACE).
                 append(SVN_REVISION_OPT);
-        if (fromRev != -1) executeCmd.append(QString::number(fromRev));
-        else executeCmd.append("0");
+        if (from != -1) execute_cmd.append(QString::number(from));
+        else execute_cmd.append("0");
 
-        executeCmd.append(":");
+        execute_cmd.append(":");
 
-        if (toRev != -1) executeCmd.append(QString::number(toRev));
-        else executeCmd.append("HEAD");
+        if (to != -1) execute_cmd.append(QString::number(to));
+        else execute_cmd.append("HEAD");
     }
 
     // Add path.
-    executeCmd.append(SPACE).append(path);
-    svnProc.start(executeCmd);
-    qDebug() << executeCmd;
-    while(!svnProc.waitForFinished(500))
+    execute_cmd.append(SPACE).append(path);
+    svn_proc.start(execute_cmd);
+    qDebug() << execute_cmd;
+    while(!svn_proc.waitForFinished(500))
     {
     }
 
-    QProcess::ExitStatus rc = svnProc.exitStatus();
+    QProcess::ExitStatus rc = svn_proc.exitStatus();
 
     if (rc == QProcess::NormalExit)
     {
         QVector<SubversionLog> logs;
-        const QByteArray svnXmlOutput = svnProc.readAllStandardOutput();
+        const QByteArray xml_output = svn_proc.readAllStandardOutput();
         try
         {
-            logs = parseLogs(&svnXmlOutput);
+            logs = parse_logs(&xml_output);
         }
         catch(...){
             // Do nothing at this point in time :p.
@@ -70,67 +71,67 @@ QVector<SubversionLog> SubversionParserSyncro::getLogs(int64_t fromRev, int64_t 
     }
 }
 
-QVector<SubversionLog> SubversionParserSyncro::getLogs()
+QVector<SubversionLog> SubversionParserSyncro::get_logs()
 {
-    return getLogs(-1 , -1);
+    return get_logs(-1 , -1);
 }
 
 
 
-bool SubversionParserSyncro::updatePath()
+bool SubversionParserSyncro::update()
 {
-    QProcess svnProc;
-    const QString executeCmd = QString().
+    QProcess svn_proc;
+    const QString execute_cmd = QString().
             append(SVN_UPDATE).
             append(SPACE) + path;
 
-    svnProc.start(executeCmd);
-    while(!svnProc.waitForFinished(500))
+    svn_proc.start(execute_cmd);
+    while(!svn_proc.waitForFinished(500))
     {
     }
 
-    const QString svnOutput = svnProc.readAllStandardOutput();
-    const QString svnError = svnProc.readAllStandardError();
+    const QString svn_output = svn_proc.readAllStandardOutput();
 
-    QProcess::ExitStatus rc = svnProc.exitStatus();
+    QProcess::ExitStatus rc = svn_proc.exitStatus();
 
     return rc == QProcess::NormalExit ? true : false;
 }
 
-QVector<SubversionLog> SubversionParserSyncro::parseLogs(const QByteArray *xmlData)
+QVector<SubversionLog> SubversionParserSyncro::parse_logs(const QByteArray *xml)
 {
-    QVector<SubversionLog> parsedLogs;
-    QDomDocument svnOutput;
-    if (!svnOutput.setContent(*xmlData)) throw E_PARSE_PROBLEMS;
+    QVector<SubversionLog> parsed_logs;
+    QDomDocument svn_output;
+    if (!svn_output.setContent(*xml)) throw E_PARSE_PROBLEMS;
 
-    QDomNodeList logEntryNodes = svnOutput.elementsByTagName(SVN_XML_LOGENTRY);
+    QDomNodeList log_entry_nodes = svn_output.elementsByTagName(SVN_XML_LOGENTRY);
 
-    for (int32_t currentLogEntryNode = 0; currentLogEntryNode < logEntryNodes.size(); currentLogEntryNode++){
-        SubversionLog currentLogEntry;
+    size_t nodes_size = log_entry_nodes.size();
+    for (size_t i = 0; i < nodes_size; i++){
+        SubversionLog new_log_entry;
 
-        const QDomNode logEntryNode = logEntryNodes.item(currentLogEntryNode);
-        currentLogEntry.revNumber = (uint64_t) logEntryNode.toElement().attribute(svnXmlRevKey).toLongLong();
-        currentLogEntry.comment = logEntryNode.firstChildElement(svnXmlMsgKey).text();
-        currentLogEntry.author = logEntryNode.firstChildElement(svnXmlAuthorKey).text();
-        currentLogEntry.date = logEntryNode.firstChildElement(svnXmlDateKey).text();
+        const QDomNode log_entry_node = log_entry_nodes.item(i);
+        new_log_entry.revNumber = (uint64_t) log_entry_node.toElement().attribute(svnXmlRevKey).toLongLong();
+        new_log_entry.comment = log_entry_node.firstChildElement(svnXmlMsgKey).text();
+        new_log_entry.author = log_entry_node.firstChildElement(svnXmlAuthorKey).text();
+        new_log_entry.date = log_entry_node.firstChildElement(svnXmlDateKey).text();
 
         // Do we have changed files?
-        const QDomElement pathsElement = logEntryNode.firstChildElement(svnXmlPathsKey);
-        if (pathsElement.isElement())
-        {
-            currentLogEntry.files = QStringList();
-            const QDomNodeList pathsNode = pathsElement.elementsByTagName(svnXmlPathKey);
-            for (int32_t currentPath = 0; currentPath < pathsNode.size(); currentPath++ )
-            {
-                const QDomNode pathNode = pathsNode.item(currentPath);
-                currentLogEntry.files.append(pathNode.toElement().text());
+        const QDomElement paths_element = log_entry_node.firstChildElement(svnXmlPathsKey);
+        if (paths_element.isElement()){
+            new_log_entry.files = QStringList();
+            const QDomNodeList paths_node = paths_element.elementsByTagName(svnXmlPathKey);
+
+            size_t paths_node_size = paths_node.size();
+            for (size_t path_i = 0; path_i < paths_node_size; path_i++){
+                const QDomNode path_node = paths_node.item(path_i);
+                new_log_entry.files.append(path_node.toElement().text());
             }
         }
 
-        parsedLogs.append(currentLogEntry);
+        parsed_logs.append(new_log_entry);
     }
 
-    return parsedLogs;
+    return parsed_logs;
 }
 
 }

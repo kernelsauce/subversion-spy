@@ -3,80 +3,77 @@
 namespace Spy{
 
 SubversionWorker::SubversionWorker(QString path,
-                                   uint32_t *pollRate,
-                                   QMutex *pollRateMutex,
+                                   uint32_t *p_rate,
+                                   QMutex *p_rate_mutex,
                                    QObject *parent) :
     QThread(parent),
     parser(SubversionParserSyncro(path, false)),
-    lastRevNumber(0),
+    last_rev(0),
     path(path),
-    pollRate(pollRate),
+    p_rate(p_rate),
     kill(false)
 {
-    this->pollRateMutex = pollRateMutex;
-    setState(S_WAIT);
+    this->p_rate_mutex = p_rate_mutex;
+    set_state(S_WAIT);
 }
 
 SubversionWorker::~SubversionWorker()
 {
-    qDebug() << "Killing SubversionWorkerThread: " << getThreadId();
-    setState(S_DIEING);
-    killMutex.lock();
+    qDebug() << "Killing SubversionWorkerThread: " << get_thread_id();
+    set_state(S_DIEING);
+    kill_mutex.lock();
     kill = true;
-    killMutex.unlock();
+    kill_mutex.unlock();
     wait();
 }
 
-QString SubversionWorker::getWorkingPath()
+QString SubversionWorker::get_working_path()
 {
     return path;
 }
 
-SubversionWorkerState SubversionWorker::getState()
+SubversionWorkerState SubversionWorker::get_state()
 {
     SubversionWorkerState returnState;
-    stateMutex.lock();
+    state_mutex.lock();
     returnState = state;
-    stateMutex.unlock();
+    state_mutex.unlock();
     return returnState;
 }
 
-uint32_t SubversionWorker::getThreadId()
+uint32_t SubversionWorker::get_thread_id()
 {
-    return threadId;
+    return thread_id;
 }
 
-QVector<SubversionLog> *SubversionWorker::getLogs(QMutex** vectorMutex)
+QVector<SubversionLog> *SubversionWorker::get_logs(QMutex** vector_mutex)
 {
-    *vectorMutex = &svnLogsMutex;
-    return &svnLogs;
+    *vector_mutex = &svn_logs_mutex;
+    return &svn_logs;
 }
 
-void SubversionWorker::setState(SubversionWorkerState state)
+void SubversionWorker::set_state(SubversionWorkerState state)
 {
-    stateMutex.lock();
+    state_mutex.lock();
     this->state = state;
-    stateMutex.unlock();
+    state_mutex.unlock();
 }
 
-void SubversionWorker::handleNewLogs(QVector<SubversionLog> *freshLogs)
+void SubversionWorker::handle_new_logs(QVector<SubversionLog> *fresh_logs)
 {
-    setState(S_UPDATING);
-    if (!freshLogs->isEmpty())
-    {
-        svnLogsMutex.lock();
-        svnLogs << *freshLogs;
-        svnLogsMutex.unlock();
+    set_state(S_UPDATING);
+    if (!fresh_logs->isEmpty()){
+        svn_logs_mutex.lock();
+        svn_logs << *fresh_logs;
+        svn_logs_mutex.unlock();
 
         // New logs incoming!
-        QVectorIterator<SubversionLog> it(*freshLogs);
-        while (it.hasNext())
-        {
+        QVectorIterator<SubversionLog> it(*fresh_logs);
+        while (it.hasNext()){
             SubversionLog freshLog = it.next();
-            lastRevNumber = freshLog.revNumber;
-            emit giveUserFeedback(
-                        "Caught check in at " + path + ". \r\n\r\n"
-                        "Revision number: r" + QString::number(lastRevNumber) + "\r\n" +
+            last_rev = freshLog.revNumber;
+            emit give_feedback("Caught check in at " + path + ". \r\n\r\n"
+                        "Revision number: r" + QString::number(last_rev) + "\r\n" +
                         "Author: " + freshLog.author + "\r\n" +
                         "Comment: " + freshLog.comment + "\r\n",
                         N_UPDATED_REPOSITORY);
@@ -84,25 +81,24 @@ void SubversionWorker::handleNewLogs(QVector<SubversionLog> *freshLogs)
     }
 }
 
-bool SubversionWorker::initialLogFetch()
+bool SubversionWorker::fetch_initial_logs()
 {
-    setState(S_UPDATING);
-    QVector<SubversionLog> fullLog = parser.getLogs();
-    if (fullLog.isEmpty()) return false; // Empty logs, just bail.
+    set_state(S_UPDATING);
+    QVector<SubversionLog> full_log = parser.get_logs();
+    if (full_log.isEmpty()) return false; // Empty logs, just bail.
 
-    svnLogsMutex.lock();
-    svnLogs << fullLog; // Append to logs.
-    svnLogsMutex.unlock();
+    svn_logs_mutex.lock();
+    svn_logs << full_log; // Append to logs.
+    svn_logs_mutex.unlock();
 
-    SubversionLog lastLog = fullLog.front();
-    lastRevNumber = lastLog.revNumber;
+    SubversionLog last_log = full_log.front();
+    last_rev = last_log.revNumber;
 
     // Update user about success.
-    emit giveUserFeedback(
-                "Full log for " + path + " fetched. \r\n\r\n"
-                "Last revision number is r" + QString::number(lastRevNumber) + "\r\n" +
-                "Author: " + lastLog.author + "\r\n" +
-                "Comment: " + lastLog.comment + "\r\n",
+    emit give_feedback("Full log for " + path + " fetched. \r\n\r\n"
+                "Last revision number is r" + QString::number(last_rev) + "\r\n" +
+                "Author: " + last_log.author + "\r\n" +
+                "Comment: " + last_log.comment + "\r\n",
                 N_UPDATED_REPOSITORY);
 
     return true;
@@ -110,53 +106,46 @@ bool SubversionWorker::initialLogFetch()
 
 void SubversionWorker::run()
 {
-    threadId = (uint32_t)this->currentThreadId(); // TODO: surivive without mutex?
+    thread_id = (uint32_t)this->currentThreadId(); // TODO: surivive without mutex?
 
-    if (lastRevNumber == 0)
-    {
-        if (!parser.updatePath())
-        {
-            setState(S_ERROR);
-            emit giveUserFeedback("Could not update: " + path, N_NOT_SVN_DIR);
+    if (last_rev == 0){
+        if (!parser.update()){
+            set_state(S_ERROR);
+            emit give_feedback("Could not update: " + path, N_NOT_SVN_DIR);
             return;
         }
     }
 
-    initialLogFetch();
+    fetch_initial_logs();
 
     /*
      * Main event loop of the Subversion Worker.
      */
-    while(1)
-    {
-        QVector<SubversionLog> freshLogs;
-        try
-        {
-            freshLogs = parser.getLogs(lastRevNumber + 1, -1);
+    while(1){
+        QVector<SubversionLog> fresh_logs;
+        try{
+            fresh_logs = parser.get_logs(last_rev + 1, -1);
         }
         catch(ParserException e){
-            setState(S_ERROR);
-            emit giveUserFeedback("Exception: " + QString::number(e) +
+            set_state(S_ERROR);
+            emit give_feedback("Exception: " + QString::number(e) +
                                   " while parsing: " + path, N_PARSE_PROBLEMS);
             break;
         }
 
-        handleNewLogs(&freshLogs);
+        handle_new_logs(&fresh_logs);
 
         // If kill is set, then we let the thread suspend.
-        killMutex.lock();
-        if (!kill)
-        {
-            killMutex.unlock();
-            setState(S_WAIT);
-            pollRateMutex->lock();
-            uint32_t currentPollRate = *pollRate;
-            pollRateMutex->unlock();
-            sleep(currentPollRate);
-        }
-        else
-        {
-            killMutex.unlock();
+        kill_mutex.lock();
+        if (!kill){
+            kill_mutex.unlock();
+            set_state(S_WAIT);
+            p_rate_mutex->lock();
+            uint32_t current_p_rate = *p_rate;
+            p_rate_mutex->unlock();
+            sleep(current_p_rate);
+        } else {
+            kill_mutex.unlock();
             break;
         }
 
