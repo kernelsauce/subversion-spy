@@ -8,7 +8,7 @@
 #include <QDebug>
 #include "subversionworker.h"
 
-#define THREAD_MONITOR_ITERATION 2
+#define THREAD_MONITOR_ITERATION 1
 
 namespace Spy{
 
@@ -33,7 +33,8 @@ public:
     ThreadMonitor(QVector<QString>* listenerPaths = NULL,
                   QMutex* listenerPathsMutex = NULL,
                   uint32_t* pollRate = NULL,
-                  QMutex* pollRateMutex = NULL);
+                  QMutex* pollRateMutex = NULL,
+                  QObject* parent = 0);
 
     ~ThreadMonitor();
 
@@ -52,7 +53,7 @@ public:
      * @param vectorMutex Lock this when accessing returned vector.
      * @returns Pointer to vector of SubversionLog structs.
      */
-    SVNLogVector* getLogsFromWorker(QString path, QMutex** vectorMutex);
+    QVector<SubversionLog>* getLogsFromWorker(QString path, QMutex** vectorMutex);
     
 signals:
     /**
@@ -60,12 +61,12 @@ signals:
      * @param message The notification message to post.
      * @param type The type of notification your are posting.
      */
-    void sendNotifications(QString message, SpyNotifications type);
+    void sendNotifications(QString msg, SpyNotifications type);
 
 private:
     QVector<QString>* listenerPaths;        ///< Pointer to vector of paths.
     QMutex* listenerPathsMutex;             ///< Lock this when accessing listenerPaths.
-    SVNWorkerPool workerPool;               ///< Pool of subversion worker pointer's.
+    QVector<SubversionWorker*> workerPool;  ///< Pool of subversion worker pointer's.
     bool kill;                              ///< Kill switch for thread monitor.
     QMutex killMutex;                       ///< Lock this when accessing kill.
     uint32_t* pollRate;                     ///< Pointer to poll rate setting.
@@ -86,7 +87,7 @@ private:
     inline bool inListenerPaths(QString listenerPath);
 
 public slots:
-    void propagateNotifications(QString message, SpyNotifications type);
+    void propagateNotifications(QString msg, SpyNotifications type);
 
 protected:
     void run();

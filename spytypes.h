@@ -57,19 +57,9 @@ typedef struct {
 
 /** @brief Container for a notification entry. */
 typedef struct {
-    QString message;        ///< Notification message.
+    QString msg;        ///< Notification message.
     SpyNotifications type;  ///< Notification type from SpyNotifications enumeration.
 } NotificationEntry;
-
-// Convinience types :-).
-typedef QVector<SubversionLog>              SVNLogVector;
-typedef QVectorIterator<SubversionLog>      SVNLogIterator;
-typedef QVector<NotificationEntry>          NotificationVector;
-typedef QVectorIterator<NotificationEntry>  NotificationIterator;
-
-class SubversionWorker; // Predeclare.
-typedef QVector<SubversionWorker*>          SVNWorkerPool;
-typedef QVectorIterator<SubversionWorker*>  SVNWorkerIterator;
 
 }
 #endif // SPYTYPES_H

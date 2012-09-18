@@ -2,94 +2,129 @@
 
 namespace Spy{
 
-SubversionSpy::SubversionSpy(QWidget *parent)
-    : QMainWindow(parent),
-      pollRate(THREAD_POLL_RATE),
-      trayIconGraphic(QIcon(":/icons/icons/spy-icon.png"))
-
+SubversionSpy::SubversionSpy(QWidget *parent) :
+    QMainWindow(parent),
+    wk_gui(0),
+    p_rate(THREAD_POLL_RATE),
+    _tray_graphics(QIcon(":/icons/icons/spy-icon.png"))
 {
-    trayIcon = new QSystemTrayIcon(trayIconGraphic, this);
-    trayMenu = new QMenu(this);
-    configureAction = new QAction("&Configure", this);
-    quitAction = new QAction("&Quit...", this);
-    aboutAction = new QAction("&About", this);
+    tray = new QSystemTrayIcon(_tray_graphics, this);
+    tray_menu = new QMenu(this);
+    config_action = new QAction("&Configure", tray_menu);
+    quit_action = new QAction("&Quit...", tray_menu);
 
     /*
      * Add menu entries.
      */
-    trayMenu->addAction(configureAction);
-    trayMenu->addSeparator();
-    trayMenu->addAction(quitAction);
-    trayMenu->addAction(aboutAction);
+    tray_menu->addAction(config_action);
+    tray_menu->addSeparator();
+    tray_menu->addAction(quit_action);
 
     /*
      * Connect signals.
      */
-    connect(quitAction, SIGNAL(triggered()), this, SLOT(stopTray()));
-    connect(configureAction, SIGNAL(triggered()), this, SLOT(openWkGui()));
-    trayIcon->setContextMenu(trayMenu);
+    connect(quit_action, SIGNAL(triggered()), this, SLOT(stop_tray()));
+    connect(config_action, SIGNAL(triggered()), this, SLOT(open_wk_gui()));
+    tray->setContextMenu(tray_menu);
 
     /*
      * Init thread monitor. Which we use to stop/start SVN threads.
      */
-    monitor = new ThreadMonitor(&listenerPaths,
-                                &listenerPathsMutex,
-                                &pollRate,
-                                &pollRateMutex);
+    monitor = new ThreadMonitor(&listenpaths,
+                                &listenpathsmutex,
+                                &p_rate,
+                                &p_rate_mutex,
+                                this);
     monitor->start();
 
     qRegisterMetaType<SpyNotifications>("SpyNotifications"); // Register our enum as meta type to allow signal and slots with the type.
-    connect(monitor, SIGNAL(sendNotifications(QString, SpyNotifications)), this, SLOT(displayNotification(QString,SpyNotifications)));
+    connect(monitor, SIGNAL(sendNotifications(QString, SpyNotifications)), this, SLOT(displaynotific(QString,SpyNotifications)));
 
-    trayIcon->show();
-    //trayIcon->showMessage("Subversion Spy started!",  "Please add path observers from the tray icon.");
-    openWkGui();
+    restore_listen_paths();
+    tray->show();
+    open_wk_gui();
 }
 
 SubversionSpy::~SubversionSpy()
 {
     qDebug() << "Destructing SubversionSpy instance.";
-    delete trayIcon;
-    delete trayMenu;
-    delete configureAction;
-    delete aboutAction;
-    delete quitAction;
-    delete monitor;
+    delete tray;
+    save_listen_paths();
 }
 
-QVector<QString> *SubversionSpy::getListenerPaths(QMutex** mutex)
+QVector<QString> *SubversionSpy::get_listen_paths(QMutex** mutex)
 {
-    *mutex = &listenerPathsMutex;
-    return &listenerPaths;
+    *mutex = &listenpathsmutex;
+    return &listenpaths;
 }
 
-NotificationVector *SubversionSpy::getAllNotifications(QMutex **mutex)
+bool SubversionSpy::save_listen_paths()
 {
-    *mutex = &notiLogMutex;
-    return &notiLog;
+    QVector<QString> *paths = 0;
+    QMutex *mutex = 0;
+    QSettings cfg("SubversionSpy Inc.", "Subversion Spy");
+    QStringList compat_list;
+
+    paths = get_listen_paths(&mutex);
+
+    if (!mutex)
+        return false;
+
+    mutex->lock();
+
+    if (paths){
+        QVectorIterator<QString> path_itr(*paths);
+        while (path_itr.hasNext()){
+            compat_list.append(path_itr.next());
+        }
+
+        cfg.setValue("paths", compat_list);
+    }
+
+    mutex->unlock();
+    return true;
 }
 
-NotificationVector *SubversionSpy::getNNotifications(uint32_t amount)
+void SubversionSpy::restore_listen_paths()
 {
-    notiLogMutex.lock();
-    uint32_t notiLogSize = notiLog.size();
-    notiLogMutex.unlock();
-    return getNNotifications(amount, amount - notiLogSize);
+    QSettings cfg("SubversionSpy Inc.", "Subversion Spy");
+    QStringList compat_list = cfg.value("paths").toStringList();
+
+    listenpathsmutex.lock();
+    QStringListIterator compat_list_itr(compat_list);
+    if (compat_list_itr.hasNext()){
+        listenpaths.append(compat_list_itr.next());
+    }
+    listenpathsmutex.unlock();
 }
 
-NotificationVector *SubversionSpy::getNNotifications(uint32_t amount, uint32_t offset)
+QVector<NotificationEntry> *SubversionSpy::get_all_notific(QMutex **mutex)
 {
-    NotificationVector* notiLogCopy = new NotificationVector;
+    *mutex = &notilogs_mutex;
+    return &notilogs;
+}
 
-    notiLogMutex.lock();
-    uint32_t notiLogSize = notiLog.size();
+QVector<NotificationEntry> *SubversionSpy::get_n_notific(uint32_t amount)
+{
+    notilogs_mutex.lock();
+    uint32_t notiLogSize = notilogs.size();
+    notilogs_mutex.unlock();
+    return get_n_notific(amount, amount - notiLogSize);
+}
+
+QVector<NotificationEntry> *SubversionSpy::get_n_notific(uint32_t amount, uint32_t offset)
+{
+    QVector<NotificationEntry> *notiLogCopy = new QVector<NotificationEntry>;
+
+    notilogs_mutex.lock();
+    uint32_t notiLogSize = notilogs.size();
 
     // Deep copy of selected notifications logs.
     for (uint32_t index = offset; index < amount; index++)
     {
         if (index < notiLogSize)
         {
-            notiLogCopy->append(notiLog[index]);
+            notiLogCopy->append(notilogs[index]);
         }
         else
         {
@@ -98,92 +133,105 @@ NotificationVector *SubversionSpy::getNNotifications(uint32_t amount, uint32_t o
         }
     }
 
-    notiLogMutex.unlock();
+    notilogs_mutex.unlock();
     return notiLogCopy;
 }
 
-void SubversionSpy::setPollRate(uint32_t seconds)
+void SubversionSpy::setpollrate(uint32_t seconds)
 {
-    pollRateMutex.lock();
-    pollRate = seconds;
-    pollRateMutex.unlock();
+    p_rate_mutex.lock();
+    p_rate = seconds;
+    p_rate_mutex.unlock();
 }
 
-uint32_t SubversionSpy::getPollRate()
+uint32_t SubversionSpy::getpollrate()
 {
     uint32_t pollRateReturn;
-    pollRateMutex.lock();
-    pollRateReturn = pollRate;
-    pollRateMutex.unlock();
+    p_rate_mutex.lock();
+    pollRateReturn = p_rate;
+    p_rate_mutex.unlock();
     return pollRateReturn;
 }
 
-ThreadMonitor *SubversionSpy::getThreadMonitor()
+ThreadMonitor *SubversionSpy::get_threadmonitor()
 {
     return monitor;
 }
 
-void SubversionSpy::stopTray()
+void SubversionSpy::stop_tray()
 {
     qDebug() << "Stopping tray.";
-    trayIcon->hide();
-    trayMenu->close();
+    tray->hide();
+    tray_menu->close();
     close();
+    qApp->exit(0);
 }
 
-void SubversionSpy::displayNotification(QString message, SpyNotifications type)
+void SubversionSpy::displaynotific(QString msg, SpyNotifications type)
 {
     // Is there a message?
-    if (message.size() <= 0) return;
+    if (msg.size() <= 0) return;
 
     // Add to notification log.
-    NotificationEntry newEntry;
-    newEntry.message = message;
-    newEntry.type = type;
-    notiLogMutex.lock();
-    notiLog.append(newEntry);
-    notiLogMutex.unlock();
+    NotificationEntry new_entry;
+    new_entry.msg = msg;
+    new_entry.type = type;
+    notilogs_mutex.lock();
+    notilogs.append(new_entry);
+    notilogs_mutex.unlock();
 
     switch (type){
     case N_PARSE_PROBLEMS:
-        trayIcon->showMessage("Subversion Spy - Parse Problems", message);
+        tray->showMessage("Subversion Spy - Parse Problems", msg);
         break;
 
     case N_UPDATED_REPOSITORY:
-        trayIcon->showMessage("Subversion Spy - Updated Repository", message);
+        tray->showMessage("Subversion Spy - Updated Repository", msg);
         break;
 
     case N_ADDED_REPOSITORY:
-        trayIcon->showMessage("Subversion Spy - New Repository", message);
+        tray->showMessage("Subversion Spy - New Repository", msg);
         break;
 
     case N_NEW_REVISON:
-        trayIcon->showMessage("Subversion Spy - Check in alert!", message);
+        tray->showMessage("Subversion Spy - Check in alert!", msg);
         break;
 
     case N_NOT_SVN_DIR:
-        trayIcon->showMessage("Subversion Spy - Not a repository", message);
+        tray->showMessage("Subversion Spy - Not a repository", msg);
         break;
     }
 }
 
-void SubversionSpy::openWkGui()
+void SubversionSpy::open_wk_gui()
 {
-    wkGui = new QWebView;
-
-    // Add Webkit bridge.
-    bridge = new SpyWkBridge(this);
+    if (!wk_gui){
+        wk_gui = new QWebView;
+        wk_gui->setAttribute(Qt::WA_DeleteOnClose);
+        connect(wk_gui,SIGNAL(destroyed()), this, SLOT(wk_gui_closedcb()));
+        wk_bridge = new SpyWkBridge(this, wk_gui);
 
 #ifdef DBG
-    wkGui->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+        wk_gui->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 #endif
 
-    wkGui->page()->mainFrame()->addToJavaScriptWindowObject("SpyWkBridge", bridge);
-    wkGui->load(QUrl("qrc:///wkGui/wkGui/index.html"));
-    wkGui->setFixedSize(WK_WINDOW_WIDTH, WK_WINDOW_HEIGHT);
-    wkGui->setWindowTitle(WK_WINDOW_NAME);
-    wkGui->setWindowIcon(QIcon(":/icons/icons/spy-icon.png"));
-    wkGui->show();
+        wk_gui->page()->mainFrame()->addToJavaScriptWindowObject("SpyWkBridge", wk_bridge);
+        wk_gui->load(QUrl("qrc:///wkGui/wkGui/index.html"));
+        wk_gui->setFixedSize(WK_WINDOW_WIDTH, WK_WINDOW_HEIGHT);
+        wk_gui->setWindowTitle(WK_WINDOW_NAME);
+        wk_gui->setWindowIcon(QIcon(":/icons/icons/spy-icon.png"));
+        wk_gui->show();
+    } else {
+        wk_gui->show();
+        wk_gui->setFocus();
+    }
+
+}
+
+void SubversionSpy::wk_gui_closedcb()
+{
+    wk_gui = 0;
+    save_listen_paths();
 }
 
 }

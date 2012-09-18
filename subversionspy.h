@@ -10,6 +10,7 @@
 #include <QMutex>
 #include <QtWebKit/QWebView>
 #include <QtWebKit/QWebFrame>
+#include <QSettings>
 
 #include <stdint.h>
 
@@ -35,23 +36,22 @@ class SubversionSpy : public QMainWindow
     Q_OBJECT
     
 private:
-    QVector<QString> listenerPaths;     ///< Paths that the thread monitor will assign to workers.
-    QMutex listenerPathsMutex;          ///< Lock this mutex when accessing listenerPaths.
-    ThreadMonitor* monitor;             ///< Thread monitor for Subversion workers.
-    NotificationVector notiLog;         ///< Vector of notification entries.
-    QMutex notiLogMutex;                ///< Lock when accessing notiLog.
-    QWebView* wkGui;                    ///< Pointer to webkit browser.
-    SpyWkBridge* bridge;                ///< Pointer to webkit javascript bridge.
-    uint32_t pollRate;                  ///< Poll rate for threads in seconds.
-    QMutex pollRateMutex;               ///< Lock when accessing pollRate.
+    QVector<QString> listenpaths;           ///< Paths that the thread monitor will assign to workers.
+    QMutex listenpathsmutex;                ///< Lock this mutex when accessing listenerPaths.
+    ThreadMonitor* monitor;                 ///< Thread monitor for Subversion workers.
+    QVector<NotificationEntry> notilogs;    ///< Vector of notification entries.
+    QMutex notilogs_mutex;                  ///< Lock when accessing notiLog.
+    QWebView* wk_gui;                       ///< Pointer to webkit browser.
+    SpyWkBridge* wk_bridge;                 ///< Pointer to webkit javascript bridge.
+    uint32_t p_rate;                        ///< Poll rate for threads in seconds.
+    QMutex p_rate_mutex;                    ///< Lock when accessing pollRate.
 
     // Tray icon:
-    QSystemTrayIcon* trayIcon;          ///< Pointer to the tray icon.
-    QIcon trayIconGraphic;              ///< Tray icon graphics.
-    QMenu* trayMenu;                    ///< Pointer to the tray menu.
-    QAction* quitAction;
-    QAction* configureAction;
-    QAction* aboutAction;
+    QSystemTrayIcon* tray;                  ///< Pointer to the tray icon.
+    QIcon _tray_graphics;                   ///< Tray icon graphics.
+    QMenu* tray_menu;                       ///< Pointer to the tray menu.
+    QAction* quit_action;
+    QAction* config_action;
 
 public:
     SubversionSpy(QWidget *parent = 0);
@@ -62,14 +62,17 @@ public:
      * @param mutex Lock this mutex before using the returned pointer.
      * @return pointer to listener paths vector.
      */
-    QVector<QString>* getListenerPaths(QMutex **mutex);
+    QVector<QString>* get_listen_paths(QMutex **mutex);
+
+    bool save_listen_paths();
+    void restore_listen_paths();
 
     /**
      * Get notifications that have already been displayed.
      * @param mutex Lock this mutex before using the returned pointer.
      * @return pointer to notifications vector.
      */
-    NotificationVector* getAllNotifications(QMutex **mutex);
+    QVector<NotificationEntry> *get_all_notific(QMutex **mutex);
 
     /**
      * Get certain amount of notifications that have already been displayed.
@@ -77,7 +80,7 @@ public:
      * @param amount get n amount of the last logs added.
      * @return pointer to notifications vector.
      */
-    NotificationVector* getNNotifications(uint32_t amount);
+    QVector<NotificationEntry> *get_n_notific(uint32_t amount);
 
     /**
      * Get certain amount of notifications that have already been displayed.
@@ -86,43 +89,44 @@ public:
      * @param offset offset for logs.
      * @return pointer to notifications vector.
      */
-    NotificationVector* getNNotifications(uint32_t amount,
+    QVector<NotificationEntry> *get_n_notific(uint32_t amount,
                                                   uint32_t offset);
 
     /**
      * Set the poll rate of the listener threads.
      * @param seconds Wait n amount seconds before doing a recheck.
      */
-    void setPollRate(uint32_t seconds);
+    void setpollrate(uint32_t seconds);
 
     /**
      * Get current poll rate of the listener threads;
      * @return the current poll rate.
      */
-    uint32_t getPollRate();
+    uint32_t getpollrate();
 
     /**
      * Get the thread monitor.
      * @returns pointer to the thread monitor.
      */
-    ThreadMonitor* getThreadMonitor();
+    ThreadMonitor* get_threadmonitor();
 
 public slots:
     /**
      * Remove the tray icon.
      */
-    void stopTray();
+    void stop_tray();
 
     /**
      * Display a tray notification with given type.
      * @see SpyNotifications enumeration.
      */
-    void displayNotification(QString message, SpyNotifications type);
+    void displaynotific(QString msg, SpyNotifications type);
 
     /**
      * Opens the Webkit GUI.
      */
-    void openWkGui();
+    void open_wk_gui();
+    void wk_gui_closedcb();
 
 };
 }

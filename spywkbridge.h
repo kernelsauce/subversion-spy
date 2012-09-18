@@ -22,7 +22,7 @@ class SpyWkBridge : public QObject
 {
     Q_OBJECT
 public:
-    SpyWkBridge(SubversionSpy *spy);
+    SpyWkBridge(SubversionSpy *spy, QObject *parent = 0);
     
 signals:
 
@@ -40,7 +40,7 @@ public slots:
      * Send a notifcation through the tray icon.
      * @param message.
      */
-    void sendNotification(QString message, int type);
+    void sendNotification(QString msg, int type);
     QStringList getAllNotifications();
     QStringList getListenerPaths();
     void addListenerPath(QString path);

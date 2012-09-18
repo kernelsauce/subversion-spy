@@ -2,7 +2,9 @@
 #include "spywkbridge.h"
 
 namespace Spy{
-SpyWkBridge::SpyWkBridge(SubversionSpy *spy) : spy(spy)
+SpyWkBridge::SpyWkBridge(SubversionSpy *spy, QObject *parent) :
+    QObject(parent),
+    spy(spy)
 {
 }
 
@@ -13,33 +15,37 @@ QString SpyWkBridge::openDirBrowser()
 
 void SpyWkBridge::sendNotification(QString message, int type)
 {
-    this->spy->displayNotification(message, (SpyNotifications)type);
+    this->spy->displaynotific(message, (SpyNotifications)type);
 }
 
 QStringList SpyWkBridge::getAllNotifications()
 {
-    QStringList notiLogsSList;
-    QMutex* notiLogMutex;
+    QStringList ret_lst;
+    QMutex* notiLogMutex = 0;
 
-    NotificationVector* notiLogs = spy->getAllNotifications(&notiLogMutex);
+    QVector<NotificationEntry> *noti_logs = spy->get_all_notific(&notiLogMutex);
+
+    if (!notiLogMutex)
+        return ret_lst;
+
     notiLogMutex->lock();
-    NotificationIterator notiItr(*notiLogs);
+    QVectorIterator<NotificationEntry> noti_itr(*noti_logs);
 
-    while (notiItr.hasNext())
+    while (noti_itr.hasNext())
     {
-        NotificationEntry nextLogEntry = notiItr.next();
-        notiLogsSList.append(nextLogEntry.message.append(":" + QString::number((int)nextLogEntry.type)));
+        NotificationEntry nextLogEntry = noti_itr.next();
+        ret_lst.append(nextLogEntry.msg.append(":" + QString::number((int)nextLogEntry.type)));
     }
 
     notiLogMutex->unlock();
-    return notiLogsSList;
+    return ret_lst;
 }
 
 QStringList SpyWkBridge::getListenerPaths()
 {
     QStringList listenerPathSList; // Compatible string list to be returned.
     QMutex* listenerPathsMutex;
-    QVector<QString> *listenerPaths = spy->getListenerPaths(&listenerPathsMutex);
+    QVector<QString> *listenerPaths = spy->get_listen_paths(&listenerPathsMutex);
 
     listenerPathsMutex->lock();
 
@@ -57,7 +63,7 @@ QStringList SpyWkBridge::getListenerPaths()
 void SpyWkBridge::addListenerPath(QString path)
 {
     QMutex* listenerPathsMutex;
-    QVector<QString>* listenerPaths = spy->getListenerPaths(&listenerPathsMutex);
+    QVector<QString>* listenerPaths = spy->get_listen_paths(&listenerPathsMutex);
 
     listenerPathsMutex->lock();
     listenerPaths->append(path);
@@ -67,16 +73,14 @@ void SpyWkBridge::addListenerPath(QString path)
 bool SpyWkBridge::removeListenerPath(QString path)
 {
     QMutex* listenerPathsMutex;
-    QVector<QString>* listenerPaths = spy->getListenerPaths(&listenerPathsMutex);
+    QVector<QString>* listenerPaths = spy->get_listen_paths(&listenerPathsMutex);
 
     int32_t index = 0;
     listenerPathsMutex->lock();
     QVectorIterator<QString> listenerPathsIt(*listenerPaths);
 
-    while (listenerPathsIt.hasNext())
-    {
-        if (listenerPathsIt.next() == path)
-        {
+    while (listenerPathsIt.hasNext()){
+        if (listenerPathsIt.next() == path){
             if (listenerPaths->size() > index) listenerPaths->remove(index); // Check boundary.
             listenerPathsMutex->unlock();
             return true;
@@ -89,30 +93,30 @@ bool SpyWkBridge::removeListenerPath(QString path)
 
 void SpyWkBridge::setPollRate(int seconds)
 {
-    spy->setPollRate((uint32_t)seconds);
+    spy->setpollrate((uint32_t)seconds);
 }
 
 int SpyWkBridge::getPollRate()
 {
-    return spy->getPollRate();
+    return spy->getpollrate();
 }
 
 QVariantMap SpyWkBridge::getThreadState()
 {
-    return spy->getThreadMonitor()->getThreadState();
+    return spy->get_threadmonitor()->getThreadState();
 }
 
 QVariantMap SpyWkBridge::getLogs(QString path)
 {
     QVariantMap fullLogList;
 
-    QMutex* vectorMutex = NULL;
-    SVNLogVector* logs = spy->getThreadMonitor()->getLogsFromWorker(path, &vectorMutex);
+    QMutex* vectorMutex = 0;
+    QVector<SubversionLog>* logs = spy->get_threadmonitor()->getLogsFromWorker(path, &vectorMutex);
 
     vectorMutex->lock();
 
     // Build our big monster log blob.
-    SVNLogIterator logItr(*logs);
+    QVectorIterator<SubversionLog> logItr(*logs);
     while (logItr.hasNext())
     {
         SubversionLog currentLog = logItr.next();

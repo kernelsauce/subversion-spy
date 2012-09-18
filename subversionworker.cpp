@@ -4,7 +4,9 @@ namespace Spy{
 
 SubversionWorker::SubversionWorker(QString path,
                                    uint32_t *pollRate,
-                                   QMutex* pollRateMutex) :
+                                   QMutex *pollRateMutex,
+                                   QObject *parent) :
+    QThread(parent),
     parser(SubversionParserSyncro(path, false)),
     lastRevNumber(0),
     path(path),
@@ -17,6 +19,7 @@ SubversionWorker::SubversionWorker(QString path,
 
 SubversionWorker::~SubversionWorker()
 {
+    qDebug() << "Killing SubversionWorkerThread: " << getThreadId();
     setState(S_DIEING);
     killMutex.lock();
     kill = true;
@@ -43,7 +46,7 @@ uint32_t SubversionWorker::getThreadId()
     return threadId;
 }
 
-SVNLogVector* SubversionWorker::getLogs(QMutex** vectorMutex)
+QVector<SubversionLog> *SubversionWorker::getLogs(QMutex** vectorMutex)
 {
     *vectorMutex = &svnLogsMutex;
     return &svnLogs;
@@ -56,7 +59,7 @@ void SubversionWorker::setState(SubversionWorkerState state)
     stateMutex.unlock();
 }
 
-void SubversionWorker::handleNewLogs(SVNLogVector* freshLogs)
+void SubversionWorker::handleNewLogs(QVector<SubversionLog> *freshLogs)
 {
     setState(S_UPDATING);
     if (!freshLogs->isEmpty())
@@ -66,7 +69,7 @@ void SubversionWorker::handleNewLogs(SVNLogVector* freshLogs)
         svnLogsMutex.unlock();
 
         // New logs incoming!
-        SVNLogIterator it(*freshLogs);
+        QVectorIterator<SubversionLog> it(*freshLogs);
         while (it.hasNext())
         {
             SubversionLog freshLog = it.next();
@@ -84,7 +87,7 @@ void SubversionWorker::handleNewLogs(SVNLogVector* freshLogs)
 bool SubversionWorker::initialLogFetch()
 {
     setState(S_UPDATING);
-    SVNLogVector fullLog = parser.getLogs();
+    QVector<SubversionLog> fullLog = parser.getLogs();
     if (fullLog.isEmpty()) return false; // Empty logs, just bail.
 
     svnLogsMutex.lock();

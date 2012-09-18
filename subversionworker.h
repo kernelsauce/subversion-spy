@@ -27,7 +27,8 @@ public:
      */
     explicit SubversionWorker(QString path = NULL,
                               uint32_t *pollRate = NULL,
-                              QMutex* pollRateMutex = NULL);
+                              QMutex *pollRateMutex = NULL,
+                              QObject *parent = 0);
     ~SubversionWorker();
 
     /**
@@ -56,11 +57,11 @@ public:
      * @param mutex Lock this when accessing the returned pointer.
      * @return Pointer to QVector.
      */
-    SVNLogVector* getLogs(QMutex** vectorMutex);
+    QVector<SubversionLog> *getLogs(QMutex** vectorMutex);
     
 private:
     SubversionParserSyncro parser;      ///< Instance of a SubversionParser class, being used.
-    SVNLogVector svnLogs;               ///< Vector of subversion logs. Contains all logs every fetched.
+    QVector<SubversionLog> svnLogs;     ///< Vector of subversion logs. Contains all logs every fetched.
     QMutex svnLogsMutex;                ///< Lock this when accessing svnLogs.
     uint64_t lastRevNumber;             ///< Last revision number fetched from repository.
     QString path;                       ///< The path to the repository.
@@ -76,7 +77,7 @@ private:
      * Called when the worker has fetched logs.
      * @param freshLogs Pointer to vector of logs.
      */
-    void handleNewLogs(SVNLogVector* freshLogs);
+    void handleNewLogs(QVector<SubversionLog>* freshLogs);
 
     /**
      * Called by thread before entering event loop to get all data from the
@@ -98,7 +99,7 @@ signals:
      * @param message The notification message to post.
      * @param type The type of notifcation you are posting.
      */
-    void giveUserFeedback(QString message, SpyNotifications type);
+    void giveUserFeedback(QString msg, SpyNotifications type);
     
 protected:
     void run();
