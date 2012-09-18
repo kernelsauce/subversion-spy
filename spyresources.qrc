@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/icons">
-        <file>icons/spy-icon.png</file>
         <file>icons/spy-icon.svg</file>
     </qresource>
     <qresource prefix="/wkGui">
